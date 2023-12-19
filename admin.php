@@ -10,7 +10,19 @@ if ($_SESSION["login"] !== "admin") {
     header("Location: user.php");
     exit();
 }
+if (isset($_GET['logout'])) {
+    // Xóa cookie
+    setcookie('username', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
+    setcookie('password', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
 
+    // Xóa phiên đăng nhập
+    unset($_SESSION['login']);
+    unset($_SESSION['name']);
+
+    // Chuyển hướng người dùng sau khi đăng xuất
+    header("Location: login.php"); // Thay thế 'login.php' bằng trang đăng nhập của bạn
+    exit();
+}
 
 ?>
 <!DOCTYPE html>
@@ -61,7 +73,8 @@ if ($_SESSION["login"] !== "admin") {
                         <ul id="sub-nav" class="sub-nav position-absolute d-none ps-0 rounded-2">
                             <li class="border-bottom"><a href="#" class="text-decoration-none p-2 text-black">Tài
                                     khoản</a></li>
-                            <li><a href="logout.php" class="p-2 text-decoration-none text-black">Đăng xuất</a></li>
+                            <li><a href="admin.php?logout=true" class="p-2 text-decoration-none text-black">Đăng
+                                    xuất</a></li>
                         </ul>
                     </li>
                 </ul>

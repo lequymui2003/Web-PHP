@@ -6,25 +6,40 @@ if (!$_SESSION["login"]) {
 
 // Thực hiện truy vấn để lấy thông tin người dùng từ hai bảng
 // var_dump($_SESSION['name']);
-$username = $_SESSION['name'];
-$sql = "SELECT users.username, users.role, sinhvien.Name 
+if (isset($_COOKIE['name'])) {
+    $username = $_COOKIE['name'];
+    $sql = "SELECT users.username, users.role, sinhvien.Name 
         FROM users 
         LEFT JOIN sinhvien ON users.username = sinhvien.MaSV 
         WHERE users.username = '$username'";
 
-$result = mysqli_query($conn, $sql);
+    $result = mysqli_query($conn, $sql);
 
-if ($result) {
-    $row = mysqli_fetch_assoc($result);
-    if ($row) {
-        $displayName = $row['Name'] ?: $row['username']; // Hiển thị tên người dùng hoặc username nếu không có tên
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        if ($row) {
+            $displayName = $row['Name'] ?: $row['username']; // Hiển thị tên người dùng hoặc username nếu không có tên
+        } else {
+            $displayName = "Tên không xác định"; // Hoặc có thể gán một giá trị mặc định
+        }
     } else {
-        $displayName = "Tên không xác định"; // Hoặc có thể gán một giá trị mặc định
+        echo "Lỗi truy vấn: " . mysqli_error($conn); // Hiển thị lỗi nếu có
     }
-} else {
-    echo "Lỗi truy vấn: " . mysqli_error($conn); // Hiển thị lỗi nếu có
 }
 
+if (isset($_GET['logout'])) {
+    // Xóa cookie
+    setcookie('username', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
+    setcookie('password', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
+
+    // Xóa phiên đăng nhập
+    unset($_SESSION['login']);
+    unset($_SESSION['name']);
+
+    // Chuyển hướng người dùng sau khi đăng xuất
+    header("Location: login.php"); // Thay thế 'login.php' bằng trang đăng nhập của bạn
+    exit();
+}
 
 ?>
 <!DOCTYPE html>
@@ -76,7 +91,8 @@ if ($result) {
                         <ul id="sub-nav" class="sub-nav position-absolute d-none ps-0 rounded-2">
                             <li class="border-bottom"><a href="#" class="text-decoration-none p-2 text-black">Tài
                                     khoản</a></li>
-                            <li><a href="logout.php" class="p-2 text-decoration-none text-black">Đăng xuất</a></li>
+                            <li><a href="user.php?logout=true" class="p-2 text-decoration-none text-black">Đăng
+                                    xuất</a></li>
                         </ul>
                     </li>
                 </ul>

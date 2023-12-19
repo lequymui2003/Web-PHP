@@ -9,7 +9,28 @@ if (isset($_SESSION['login'])) {
 <?php
 $emptyerror = "";
 $error = "";
-$username = "";
+if (isset($_COOKIE['username']) && isset($_COOKIE['password']) && isset($_COOKIE['remember_token'])) {
+    $user = $_COOKIE['username'];
+    $pass = $_COOKIE['password'];
+    $token = $_COOKIE['remember_token'];
+
+    $result = mysqli_query($conn, "SELECT * FROM users join token on users.username = token.username where users.username = '$user' and users.matkhau = '$pass' and token.token = '$token'");
+    $row = mysqli_fetch_assoc($result);
+    if ($row) {
+        // Đăng nhập thành công từ thông tin lưu trong cookies
+        $_SESSION["login"] = $row['role'];
+        $_SESSION["name"] = $row['username'];
+        if ($_SESSION["login"] === "admin") {
+            header("Location: admin.php");
+        } else {
+            header("Location: user.php");
+        }
+        exit();
+    }
+} else {
+    $user = $pass = "";
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST["user_name"];
     $password = $_POST["user_password"];
@@ -19,12 +40,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $emptyerror = "Mời bạn nhập đầy đủ tên đăng nhập và mật khẩu";
     } else {
         // Nếu không có trường nào rỗng, tiếp tục xử lý đăng nhập
-        $result = mysqli_query($conn, "SELECT * FROM users where username = '$username' and matkhau = '$password'");
+        $result = mysqli_query($conn, "SELECT * FROM users where username = '$username'  and matkhau = '$password'");
         $row = mysqli_fetch_assoc($result);
 
         if ($row) {
             $_SESSION["login"] = $row['role'];
             $_SESSION["name"] = $username;
+            if (isset($_REQUEST["remember"])) {
+                $token = bin2hex(random_bytes(32)); // Tạo token 32 bytes (256 bits)
+                $user_id = $row['username']; // ID của người dùng đăng nhập
+                $query = mysqli_query($conn, "INSERT INTO token (username, token) VALUES ('$user_id', '$token')");
+                setcookie('username', $_REQUEST["user_name"], time() + (86400) * 30);
+                setcookie('password', $_REQUEST["user_password"], time() + (86400) * 30);
+                setcookie('name', $_SESSION["name"], time() + (86400) * 30);
+                setcookie('remember_token', $token, time() + (86400 * 30)); // Thời gian sống 30 ngày
+            } else {
+                setcookie('username', $_REQUEST["user_name"], time() - (86400) * 30);
+                setcookie('password', $_REQUEST["user_password"], time() - (86400) * 30);
+            }
             header("Location: admin.php");
             exit();
         } else {
@@ -70,13 +103,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <span class="input-group-text size-text"><i class="bi bi-person"></i></span>
                     <input type="text" id="username" class="form-control size-text" name="user_name"
                         placeholder="Tên đăng nhập" aria-label="Username" aria-describedby="basic-addon1"
-                        value="<?php echo $username ?>">
+                        value="<?php echo $user ?>">
                 </div>
                 <div class="input-group mb-4">
                     <span class="input-group-text size-text custom-cursor">
                         <i class="toggle-password bi bi-eye"></i></span>
                     <input type="password" id="password" class="form-control size-text" name="user_password"
-                        placeholder="Nhập mật khẩu" aria-label="password" aria-describedby="basic-addon1">
+                        placeholder="Nhập mật khẩu" aria-label="password" aria-describedby="basic-addon1"
+                        value="<?php echo $pass ?>">
                 </div>
                 <div class="input-group mb-4">
                     <span>
