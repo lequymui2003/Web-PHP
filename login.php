@@ -14,7 +14,7 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password']) && isset($_COOKIE
     $pass = $_COOKIE['password'];
     $token = $_COOKIE['remember_token'];
 
-    $result = mysqli_query($conn, "SELECT * FROM users join token on users.username = token.username where users.username = '$user' and users.matkhau = '$pass' and token.token = '$token'");
+    $result = mysqli_query($conn, "SELECT * FROM users join token on users.username = token.username where users.username = '$user' and users.password = '$pass' and token.token = '$token'");
     $row = mysqli_fetch_assoc($result);
     if ($row) {
         // Đăng nhập thành công từ thông tin lưu trong cookies
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $emptyerror = "Mời bạn nhập đầy đủ tên đăng nhập và mật khẩu";
     } else {
         // Nếu không có trường nào rỗng, tiếp tục xử lý đăng nhập
-        $result = mysqli_query($conn, "SELECT * FROM users where username = '$username'  and matkhau = '$password'");
+        $result = mysqli_query($conn, "SELECT * FROM users where username = '$username'  and password = '$password'");
         $row = mysqli_fetch_assoc($result);
 
         if ($row) {
@@ -78,8 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.js"
-        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="icon" href="path/to/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="main.css">

@@ -13,6 +13,20 @@ $(document).ready(function(){
         }
     });
 
+    $("#table tbody tr").click(function() {
+        var idPhong = $(this).find("td:eq(0)").text().trim();
+        var tenPhong = $(this).find("td:eq(1)").text().trim();
+        var idKhoa = $(this).find("td:eq(2)").text().trim();
+        var idMon = $(this).find("td:eq(3)").text().trim();
+        var tinhTrang = $(this).find("td:eq(4)").text().trim();
+
+        $('input[name="idPhong"]').val(idPhong); // Thay input[name="idPhong"] bằng selector thật của ô input
+        $('input[name="tenPhong"]').val(tenPhong); // Thay input[name="tenPhong"] bằng selector thật của ô input
+        $('input[name="idKhoa"]').val(idKhoa); // Thay input[name="idKhoa"] bằng selector thật của ô input
+        $('input[name="idMon"]').val(idMon); // Thay input[name="idMon"] bằng selector thật của ô input
+        $('input[name="tinhTrang"]').val(tinhTrang); // Thay input[name="tinhTrang"] bằng selector thật của ô input
+    });
+
     // //hiển thị form quên mật khẩu
     // $('#forgotPassword').on('click', function(event) {
     //     event.preventDefault();
@@ -75,6 +89,5 @@ $(document).ready(function(){
                 $('#sub-nav').removeClass('d-block').addClass('d-none');
             }
         });
-
 });
 
