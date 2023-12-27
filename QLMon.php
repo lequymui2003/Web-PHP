@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
-        $searchPHSql = "SELECT * FROM phonghoc WHERE tenPhong = '$name'";
+        $searchPHSql = "SELECT  * FROM monhoc WHERE tenMon = '$name'";
         $result = $conn->query($searchPHSql);
         if ($result) {
             if (mysqli_num_rows($result) > 0) {
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
                     $searchResults[] = $row;
                 }
             } else {
-                echo "Không tìm thấy kết quả.";
+                // echo "Không tìm thấy kết quả.";
             }
         } else {
             echo "Lỗi: " . $conn->error;
@@ -53,41 +53,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
-    $idPH = $_POST["input1"];
-    $namePH = $_POST["input2"];
-    $idKhoa = $_POST["input3"];
+    // Dữ liệu từ form
+    $idMon = $_POST["input1"];
+    $tenMon = $_POST["input2"];
+    $soTinChi = $_POST["input3"];
+    $idKhoa = $_POST["input4"];
 
+    // Câu lệnh UPDATE
+    $updateMonHocSql = "UPDATE monhoc 
+                    SET tenMon = '$tenMon', soTinChi = '$soTinChi', idKhoa = '$idKhoa'
+                    WHERE idMon = '$idMon'";
 
-    $updatePHSql = "UPDATE phonghoc SET tenphong = '$namePH', 
-    idKhoa = '$idKhoa'
-    WHERE idPhong = '$idPH'";
-    if ($conn->query($updatePHSql) === TRUE) {
+    // Thực thi câu lệnh
+    if ($conn->query($updateMonHocSql) === TRUE) {
+        // Xử lý khi cập nhật dữ liệu thành công
     } else {
+        // Xử lý khi có lỗi xảy ra trong quá trình cập nhật dữ liệu
     }
+
 }
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
-    $idPH = $_POST["input1"];
-    $namePH = $_POST["input2"];
-    $idKhoa = $_POST["input3"];
+    $idMon = $_POST["input1"];
+    $tenMon = $_POST["input2"];
+    $soTinChi = $_POST["input3"];
+    $idKhoa = $_POST["input4"];
 
-
-    $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong, idKhoa) 
-                      VALUES ('$idPH', '$namePH', '$idKhoa')";
+    $insertPHSql = "INSERT INTO monhoc (idMon, tenMon, soTinChi, idKhoa) 
+                      VALUES ('$idMon', '$tenMon', '$soTinChi','$idKhoa')";
     if ($conn->query($insertPHSql) === TRUE) {
     } else {
     }
 }
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
-    $idPhonghoc = $_POST["IDPhonghoc"];
+    $idMon = $_POST["IDMon"];
 
-    $deletePHSql = "DELETE FROM phonghoc WHERE idPhong= '$idPhonghoc'";
+    $deletePHSql = "DELETE FROM monhoc WHERE idMon = '$idMon'";
     if ($conn->query($deletePHSql) === TRUE) {
     } else {
     }
 }
-$sql = mysqli_query($conn, "SELECT * FROM phonghoc");
+$sql = mysqli_query($conn, "SELECT * FROM monhoc ");
 if (mysqli_num_rows($sql) === 0) {
 }
 ?>
@@ -104,10 +111,10 @@ require_once 'header.php';
                             class="col-xs-12 col-sm-12 col-md-12 col-lg-8 w-100 border-collapse text-center table">
                             <thead>
                                 <tr class="table-dark text-white">
-                                    <th>ID Phòng</th>
-                                    <th>Tên Phòng</th>
+                                    <th>ID Môn</th>
+                                    <th>Tên Môn</th>
+                                    <th>Số tín chỉ</th>
                                     <th>ID Khoa</th>
-                                    <!-- <th>Tình trạng</th> -->
                                     <th>Chức năng</th>
                                 </tr>
                             </thead>
@@ -120,21 +127,21 @@ require_once 'header.php';
                                         ?>
                                         <tr class="<?php echo $class ?>">
                                             <td>
-                                                <?php echo $searchResult["idPhong"] ?>
+                                                <?php echo $searchResult["idMon"] ?>
                                             </td>
                                             <td>
-                                                <?php echo $searchResult["tenPhong"] ?>
+                                                <?php echo $searchResult["tenMon"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["soTinChi"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["idKhoa"] ?>
                                             </td>
-                                            <!-- <td>
-                                                <?php echo $searchResult["tinhTrang"] ?>
-                                            </td> -->
                                             <td>
                                                 <form action="" method='post'>
-                                                    <input type="hidden" name="IDPhonghoc"
-                                                        value="<?php echo $searchResult["idPhong"] ?>">
+                                                    <input type="hidden" name="IDMon"
+                                                        value="<?php echo $searchResult["idMon"] ?>">
                                                     <input type="submit" name="delete" value="Xóa" class="input-style"></input>
                                                 </form>
                                             </td>
@@ -151,21 +158,20 @@ require_once 'header.php';
                                         ?>
                                         <tr class="<?php echo $class ?>">
                                             <td>
-                                                <?php echo $row["idPhong"] ?>
+                                                <?php echo $row["idMon"] ?>
                                             </td>
                                             <td>
-                                                <?php echo $row["tenPhong"] ?>
+                                                <?php echo $row["tenMon"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["soTinChi"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $row["idKhoa"] ?>
                                             </td>
-                                            <!-- <td>
-                                                <?php echo $row["tinhTrang"] ?>
-                                            </td> -->
                                             <td>
                                                 <form action="" method='post'>
-                                                    <input type="hidden" name="IDPhonghoc"
-                                                        value="<?php echo $row["idPhong"] ?>">
+                                                    <input type="hidden" name="IDMon" value="<?php echo $row["idMon"] ?>">
                                                     <input type="submit" name="delete" value="Xóa" class="input-style"></input>
                                                 </form>
                                             </td>
@@ -182,7 +188,7 @@ require_once 'header.php';
                         <div class="row">
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-12">
                                 <form method="post" action="" class="d-flex justify-content-around form-search">
-                                    <input type="text" name="search-name" placeholder="Nhập tên phòng học"
+                                    <input type="text" name="search-name" placeholder="Nhập tên môn"
                                         value="<?php echo $name ?>">
                                     <input type="submit" name="search" value="Tìm kiếm" class="input-style me-4">
                                 </form>
@@ -192,14 +198,19 @@ require_once 'header.php';
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-10">
                                 <form action="" method="post">
                                     <div class="d-flex flex-column ms-2">
-                                        <label for="">ID Phòng : </label>
-                                        <input float="left" type="text" placeholder="Nhập ID phòng"
+                                        <label for="">ID Môn : </label>
+                                        <input float="left" type="text" placeholder="Nhập ID môn"
                                             style="padding: 2px 3px;" class="rounded" name="input1">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
-                                        <label for="">Tên phòng: </label>
-                                        <input type="text" placeholder="Nhập tên phòng"
+                                        <label for="">Tên Môn: </label>
+                                        <input type="text" placeholder="Nhập tên môn"
                                             style="padding: 2px 3px; text-align:left;" class="rounded" name="input2">
+                                    </div>
+                                    <div class="d-flex flex-column ms-2 mt-2">
+                                        <label for="">Số tín chỉ: </label>
+                                        <input type="text" placeholder="Nhập số tín chỉ" style="padding: 2px 3px"
+                                            class="rounded" name="input3">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">ID Khoa: </label>

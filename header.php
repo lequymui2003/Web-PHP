@@ -16,11 +16,11 @@
     <title>Admin</title>
 </head>
 
-<body>
+<body class="custom-scrollbar">
     <header class="container-fluid">
         <div class="row row-header">
             <div class="col-xs-12 text-center">
-                <img src="./img/truong-dai-hoc-cong-nghe-dong-a-eaut-3.jpg" alt="" class="w-5 h-50">
+                <img src="./img/truong-dai-hoc-cong-nghe-dong-a-eaut-3.jpg" alt="" class="w-5 h-40">
             </div>
         </div>
     </header>
@@ -29,12 +29,14 @@
         <div class="row row-navbar">
             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-9">
                 <ul class="d-flex align-items-center justify-content-between h-100 ps-5 nav nav-tabs">
-                    <li><a href="" class="text-decoration-none ">Quản lý phòng học</a></li>
-                    <li><a href="" class="text-decoration-none ">Quản lý môn học</a></li>
-                    <li><a href="" class="text-decoration-none ">Quản lý giảng viên</a></li>
-                    <li><a href="" class="text-decoration-none ">Quản lý danh sách lớp</a></li>
-                    <li><a href="" class="text-decoration-none ">Quản lý cơ sở vật chất</a></li>
-                    <li><a href="" class="text-decoration-none ">Báo cáo thống kê</a></li>
+                    <li><a href="admin.php" class="text-decoration-none ">Quản lý phòng học</a></li>
+                    <li><a href="QLMon.php" class="text-decoration-none ">Quản lý môn học</a></li>
+                    <li><a href="QLGiangvien.php" class="text-decoration-none ">Quản lý giảng viên</a></li>
+                    <li><a href="QLLop.php" class="text-decoration-none ">Quản lý lớp</a></li>
+                    <li><a href="QLcsvc.php" class="text-decoration-none ">Cơ sở vật chất</a></li>
+                    <li><a href="QLtaikhoan.php" class="text-decoration-none ">Quản lý tài khoản</a></li>
+                    <li><a href="xeplich.php" class="text-decoration-none ">Xếp lịch</a></li>
+                    <li><a href="Baocaothongke.php" class="text-decoration-none ">Báo cáo thống kê</a></li>
                 </ul>
             </div>
             <div class="col-xs-8 col-sm-6 col-md-6 col-lg-3">
@@ -46,9 +48,10 @@
                             <i class="bi bi-person-circle icon-user ms-2"></i>
                         </a>
                         <ul id="sub-nav" class="sub-nav position-absolute d-none ps-0 rounded-2">
-                            <li class="border-bottom"><a href="#" class="text-decoration-none p-2 text-black">Tài
+                            <li><a href="#" class="text-decoration-none p-2 text-white">Tài
                                     khoản</a></li>
-                            <li><a href="admin.php?logout=true" class="p-2 text-decoration-none text-black">Đăng
+                            <li><a id="logout" href="admin.php?logout=true"
+                                    class="p-2 text-decoration-none text-white">Đăng
                                     xuất</a></li>
                         </ul>
                     </li>
@@ -56,6 +59,7 @@
             </div>
         </div>
     </section>
+    <script src="index.js"></script>
 </body>
 
 </html>

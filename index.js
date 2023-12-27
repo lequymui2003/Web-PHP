@@ -12,69 +12,34 @@ $(document).ready(function(){
             $(this).removeClass('bi bi-eye-slash').addClass('bi bi-eye');
         }
     });
+    
 
     $("#table tbody tr").click(function() {
-        var idPhong = $(this).find("td:eq(0)").text().trim();
-        var tenPhong = $(this).find("td:eq(1)").text().trim();
-        var idKhoa = $(this).find("td:eq(2)").text().trim();
-        var idMon = $(this).find("td:eq(3)").text().trim();
-        var tinhTrang = $(this).find("td:eq(4)").text().trim();
+        var input1 = $(this).find("td:eq(0)").text().trim();
+        var input2 = $(this).find("td:eq(1)").text().trim();
+        var input3 = $(this).find("td:eq(2)").text().trim();
+        var input4 = $(this).find("td:eq(3)").text().trim();
+        var input5 = $(this).find("td:eq(4)").text().trim();
+        var input6 = $(this).find("td:eq(5)").text().trim();
+        var input7 = $(this).find("td:eq(6)").text().trim();
 
-        $('input[name="idPhong"]').val(idPhong); // Thay input[name="idPhong"] bằng selector thật của ô input
-        $('input[name="tenPhong"]').val(tenPhong); // Thay input[name="tenPhong"] bằng selector thật của ô input
-        $('input[name="idKhoa"]').val(idKhoa); // Thay input[name="idKhoa"] bằng selector thật của ô input
-        $('input[name="idMon"]').val(idMon); // Thay input[name="idMon"] bằng selector thật của ô input
-        $('input[name="tinhTrang"]').val(tinhTrang); // Thay input[name="tinhTrang"] bằng selector thật của ô input
+        $('input[name="input1"]').val(input1); 
+        $('input[name="input2"]').val(input2); 
+        $('input[name="input3"]').val(input3); 
+        $('input[name="input4"]').val(input4); 
+        $('input[name="input5"]').val(input5); 
+        $('input[name="input6"]').val(input6); 
+        $('input[name="input7"]').val(input7); 
     });
 
-    // //hiển thị form quên mật khẩu
-    // $('#forgotPassword').on('click', function(event) {
-    //     event.preventDefault();
-    //     $('#login').hide();
-    //     $('#form-forgotPassword').removeClass("d-none").addClass("d-block");
-    // });
-    
-    // //random mã ngẫu nhiên và kiểm tra form quên mật khẩu
-    //     // Mã ngẫu nhiên ban đầu
-    //     let currentCode = generateRandomCode();
-    //     $('#random-code').text(currentCode);
-    
-    //     // Hàm sinh mã ngẫu nhiên
-    //     function generateRandomCode() {
-    //         const codeLength = 5;
-    //         const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    //         let code = '';
-    //         for (let i = 0; i < codeLength; i++) {
-    //             const randomIndex = Math.floor(Math.random() * characters.length);
-    //             code += characters.charAt(randomIndex);
-    //         }
-    //         return code;
-    //     }
-    //     // Xử lý sự kiện khi submit form
-    //     $('#form-forgotPassword').on('submit', function(event) {
-    //         event.preventDefault();
-    //         var inputCode = $('#input-code').val();
-    //         // var forgotUsernameValue = $("#forgotUsername").val();
-    //         // var emailValue = $("#email").val();
+    $('#logout').on('click', function(event) {
+        event.preventDefault(); // Ngăn chặn hành động mặc định khi click liên kết
 
-    //         // if(forgotUsernameValue === "" && emailValue === ""){
-    //         //     alert("Mời bạn nhập tên đăng nhập và email");
-    //         // }
-    //         // else if(forgotUsernameValue === ""){
-    //         //     alert("Mời bạn nhập tên đăng nhập");
-    //         // }
-    //         // else if(emailValue === ""){
-    //         //     alert("Mời bạn nhập email");
-    //         // }
-    //          if(inputCode === ""){
-    //             alert("Mời bạn nhập mã");
-    //         } else {
-    //             alert('Mã nhập sai! Vui lòng nhập lại.');
-    //             // Tạo mã mới và cập nhật hiển thị
-    //             currentCode = generateRandomCode();
-    //             $('#random-code').text(currentCode);
-    //         }
-    //     });
+        const confirmLogout = confirm("Bạn có chắc chắn muốn đăng xuất?");
+        if (confirmLogout) {
+            window.location.href = "admin.php?logout=true"; // Điều hướng đến trang đăng xuất khi xác nhận
+        }
+    });
 
         // trang chủ
         $("#icon-user").on('click', function(event) {

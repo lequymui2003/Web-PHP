@@ -31,7 +31,6 @@ global $conn;
             <div class="logo-eaut">
                 <img src="./img/LOGO_EAUT.png" alt="" class="w-50">
             </div>
-
             <?php
             $loi = "";
             $pass = "";
@@ -49,7 +48,7 @@ global $conn;
                     $sql = mysqli_query($conn, "SELECT * FROM users where username = '$tendangnhap' and email = '$email'");
                     $row = mysqli_fetch_assoc($sql);
                     if ($row) {
-                        $pass = "Mật khẩu của bạn là : " . $row['matkhau'];
+                        $pass = "Mật khẩu của bạn là : " . $row['password'];
                     }
                 }
             }
