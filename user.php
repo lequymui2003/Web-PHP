@@ -6,8 +6,8 @@ if (!$_SESSION["login"]) {
 
 // Thực hiện truy vấn để lấy thông tin người dùng từ hai bảng
 // var_dump($_SESSION['name']);
-if (isset($_COOKIE['name'])) {
-    $username = $_COOKIE['name'];
+if (isset($_COOKIE['name']) || isset($_SESSION['name'])) {
+    $username = $_COOKIE['name'] = $_SESSION['name'];
     $sql = "SELECT users.username, users.role, nguoidung.Name 
         FROM users 
         LEFT JOIN nguoidung ON users.username = nguoidung.ID 
@@ -179,9 +179,11 @@ if (mysqli_num_rows($sql) === 0) {
                             <i class="bi bi-person-circle icon-user ms-2"></i>
                         </a>
                         <ul id="sub-nav" class="sub-nav position-absolute d-none ps-0 rounded-2">
-                            <li class="border-bottom"><a href="#" class="text-decoration-none p-2 text-white">Tài
-                                    khoản</a></li>
-                            <li><a href="user.php?logout=true" class="p-2 text-decoration-none text-white">Đăng
+                            <li class="border-bottom"><a href="#" class="text-decoration-none p-2 text-white"
+                                    data-bs-toggle="modal" data-bs-target="#changePasswordModal">Đổi mật
+                                    khẩu</a></li>
+                            <li><a id="logout" href="user.php?logout=true"
+                                    class="p-2 text-decoration-none text-white">Đăng
                                     xuất</a></li>
                         </ul>
                     </li>
@@ -351,6 +353,86 @@ if (mysqli_num_rows($sql) === 0) {
                 </div>
             </div>
         </section>
+        <?php
+        $error = "";
+        $succes = "";
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["changepassword"])) {
+            $oldpass = $_POST['oldPassword'];
+            $newpass = $_POST['newPassword'];
+            $confirmpass = $_POST['confirmPassword'];
+
+            if (empty($oldpass) || empty($newpass) || empty($confirmpass)) {
+                $error = "Mời bạn điền đầy đủ thông tin";
+            } elseif ($confirmpass !== $newpass) {
+                $error = "Xác nhận mật khẩu không khớp, mời nhập lại";
+            } else {
+                // Lấy mật khẩu hiện tại của người dùng từ cơ sở dữ liệu
+                $username = $_SESSION['name']; // Sử dụng tên người dùng từ phiên đăng nhập
+                $sql = "SELECT password FROM users WHERE username = '$username'";
+                $result = $conn->query($sql);
+
+                if ($result && $result->num_rows > 0) {
+                    $row = $result->fetch_assoc();
+                    $currentPassword = $row['password'];
+
+                    // So sánh mật khẩu hiện tại với mật khẩu đã nhập
+                    if ($oldpass == $currentPassword) {
+                        $updateSql = "UPDATE users SET password = '$newpass' WHERE username = '$username'";
+                        if ($conn->query($updateSql) === TRUE) {
+                            $succes = "Đổi mật khẩu thành công";
+                        } else {
+                            $error = "Lỗi khi cập nhật mật khẩu: " . $conn->error;
+                        }
+                    } else {
+                        $error = "Mật khẩu cũ không đúng";
+                    }
+                } else {
+                    $error = "Không tìm thấy người dùng";
+                }
+            }
+        }
+        ?>
+
+        <!-- Thêm modal vào trang -->
+        <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changePasswordModalLabel">Đổi mật khẩu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <form method="post" action="">
+                            <div class="mb-3">
+                                <label for="oldPassword" class="form-label">Mật khẩu cũ:</label>
+                                <input type="password" class="form-control" id="oldPassword" name="oldPassword"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">Mật khẩu mới:</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Xác nhận mật khẩu mới:</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                    required>
+                            </div>
+                            <p>
+                                <?php echo $error ?>
+                                <?php echo $succes ?>
+                            </p>
+                            <button name="changepassword" type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </main>
     <script src="index.js"></script>
 </body>

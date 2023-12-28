@@ -48,8 +48,8 @@
                             <i class="bi bi-person-circle icon-user ms-2"></i>
                         </a>
                         <ul id="sub-nav" class="sub-nav position-absolute d-none ps-0 rounded-2">
-                            <li><a href="#" class="text-decoration-none p-2 text-white">Tài
-                                    khoản</a></li>
+                            <!-- <li><a href="#" class="text-decoration-none p-2 text-white">Tài
+                                    khoản</a></li> -->
                             <li><a id="logout" href="admin.php?logout=true"
                                     class="p-2 text-decoration-none text-white">Đăng
                                     xuất</a></li>

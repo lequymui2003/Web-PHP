@@ -38,6 +38,7 @@ $(document).ready(function(){
         const confirmLogout = confirm("Bạn có chắc chắn muốn đăng xuất?");
         if (confirmLogout) {
             window.location.href = "admin.php?logout=true"; // Điều hướng đến trang đăng xuất khi xác nhận
+            window.location.href = "user.php?logout=true"; // Điều hướng đến trang đăng xuất khi xác nhận
         }
     });
 
@@ -54,5 +55,6 @@ $(document).ready(function(){
                 $('#sub-nav').removeClass('d-block').addClass('d-none');
             }
         });
+
 });
 
