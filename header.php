@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="./assets/css/main.css">
     <title>Admin</title>
 </head>
 
@@ -20,7 +20,7 @@
     <header class="container-fluid">
         <div class="row row-header">
             <div class="col-xs-12 text-center">
-                <img src="./img/truong-dai-hoc-cong-nghe-dong-a-eaut-3.jpg" alt="" class="w-5 h-40">
+                <img src="./assets/img/truong-dai-hoc-cong-nghe-dong-a-eaut-3.jpg" alt="" class="w-5 h-40">
             </div>
         </div>
     </header>
@@ -59,7 +59,7 @@
             </div>
         </div>
     </section>
-    <script src="index.js"></script>
+    <script src="./assets/scripts/index.js"></script>
 </body>
 
 </html>

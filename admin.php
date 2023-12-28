@@ -1,5 +1,5 @@
 <?php
-include "Class-Database.php";
+include "./database/Class-Database.php";
 global $conn;
 if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
     header("Location: login.php");

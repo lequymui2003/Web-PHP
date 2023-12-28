@@ -1,5 +1,5 @@
 <?php
-include "Class-Database.php";
+include "./database/Class-Database.php";
 global $conn;
 ?>
 <!DOCTYPE html>
@@ -17,7 +17,7 @@ global $conn;
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="icon" href="path/to/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="./assets/css/main.css">
     <title>Remember Pass</title>
 </head>
 
@@ -25,11 +25,11 @@ global $conn;
 
     <section class=" d-flex justify-content-center text-center align-items-center">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 image-background">
-            <img src="./img/truong.webp" alt="">
+            <img src="./assets/img/truong.webp" alt="">
         </div>
         <div class="form-login p-4 d-flex flex-column align-items-center justify-content-between">
             <div class="logo-eaut">
-                <img src="./img/LOGO_EAUT.png" alt="" class="w-50">
+                <img src="./assets/img/LOGO_EAUT.png" alt="" class="w-50">
             </div>
             <?php
             $loi = "";
@@ -97,7 +97,7 @@ global $conn;
             </div>
         </div>
     </section>
-    <script src="./index.js"></script>
+    <script src="./assets/scripts/index.js"></script>
 </body>
 
 </html>

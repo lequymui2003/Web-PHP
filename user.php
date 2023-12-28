@@ -1,5 +1,6 @@
 <?php
-include "Class-Database.php";
+include "./database/Class-Database.php";
+global $conn;
 if (!$_SESSION["login"]) {
     header("Location: login.php");
 }
@@ -434,7 +435,7 @@ if (mysqli_num_rows($sql) === 0) {
 
 
     </main>
-    <script src="index.js"></script>
+    <script src="./assets/scripts/index.js"></script>
 </body>
 
 </html>
