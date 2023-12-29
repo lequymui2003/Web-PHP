@@ -13,7 +13,7 @@ $(document).ready(function(){
         }
     });
     
-
+    // lấy ra giá trị của bảng vào các ô input
     $("#table tbody tr").click(function() {
         var input1 = $(this).find("td:eq(0)").text().trim();
         var input2 = $(this).find("td:eq(1)").text().trim();
@@ -32,15 +32,27 @@ $(document).ready(function(){
         $('input[name="input7"]').val(input7); 
     });
 
+    // nút đăng xuất
     $('#logout').on('click', function(event) {
-        event.preventDefault(); // Ngăn chặn hành động mặc định khi click liên kết
-
-        const confirmLogout = confirm("Bạn có chắc chắn muốn đăng xuất?");
-        if (confirmLogout) {
-            window.location.href = "admin.php?logout=true"; // Điều hướng đến trang đăng xuất khi xác nhận
-            window.location.href = "user.php?logout=true"; // Điều hướng đến trang đăng xuất khi xác nhận
-        }
+        event.preventDefault();
+    
+        Swal.fire({
+            title: 'Xác nhận đăng xuất',
+            text: 'Bạn có chắc chắn muốn đăng xuất?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "admin.php?logout=true";
+                window.location.href = "user.php?logout=true";
+                // Hoặc window.location.href = "user.php?logout=true"; nếu cần
+            }
+        });
     });
+    
+    
 
         // trang chủ
         $("#icon-user").on('click', function(event) {
@@ -56,5 +68,46 @@ $(document).ready(function(){
             }
         });
 
+
+        $('#changePasswordForm').on('submit', function(event) {
+            event.preventDefault(); // Ngăn chặn submit mặc định của form
+        
+            // Lấy giá trị từ các trường input
+            const oldPassword = $('#oldPassword').val();
+            const newPassword = $('#newPassword').val();
+            const confirmPassword = $('#confirmPassword').val();
+          
+            // Kiểm tra các điều kiện của mật khẩu và xử lý logic ở đây
+            let error = "";
+            let success = "";
+        
+            if (oldPassword === "" || newPassword === "" || confirmPassword === "") {
+                error = "Mời bạn điền đầy đủ thông tin";
+            } else if(newPassword !== confirmPassword) {
+                error = "Xác nhận mật khẩu không khớp, mời nhập lại";
+            } else {
+                // Xử lý logic đổi mật khẩu ở đây
+                $.ajax({
+                    type: "POST",
+                    url: "process_change_password.php", // Đường dẫn đến file xử lý PHP
+                    data: {
+                        oldPassword: oldPassword,
+                        newPassword: newPassword,
+                        confirmPassword: confirmPassword
+                    },
+                    success: function(response) {
+                        if (response === "success") {
+                            $('#messageContainer').html('<p class="success-message">Đổi mật khẩu thành công</p>');
+                        } else {
+                            $('#messageContainer').html('<p class="error-message">' + response + '</p>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#messageContainer').html('<p class="error-message">Lỗi không xác định. Vui lòng thử lại sau.</p>');
+                    }
+                });
+            }
+        });
+        
 });
 

@@ -97,9 +97,6 @@
     box-shadow: 0px 0px 21px rgb(0 0 0 / 20%);
     background-color: #000;
 }
-.sub-nav>li:first-child{
-    border-bottom: 1px solid #565252
-}
 .sub-nav li{
       padding: 5px 0 5px 0;
 }

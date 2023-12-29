@@ -149,8 +149,10 @@ if (mysqli_num_rows($sql) === 0) {
         crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <!-- Include the SweetAlert2 library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="./assets/css/main.css">
     <title>User</title>
 </head>
 
@@ -158,7 +160,7 @@ if (mysqli_num_rows($sql) === 0) {
     <header class="container-fluid">
         <div class="row row-header">
             <div class="col-xs-12 text-center">
-                <img src="./img/truong-dai-hoc-cong-nghe-dong-a-eaut-3.jpg" alt="" class="w-5 h-40">
+                <img src="./assets/img/truong-dai-hoc-cong-nghe-dong-a-eaut-3.jpg" alt="" class="w-5 h-40">
             </div>
         </div>
     </header>
@@ -180,8 +182,9 @@ if (mysqli_num_rows($sql) === 0) {
                             <i class="bi bi-person-circle icon-user ms-2"></i>
                         </a>
                         <ul id="sub-nav" class="sub-nav position-absolute d-none ps-0 rounded-2">
-                            <li class="border-bottom"><a href="#" class="text-decoration-none p-2 text-white"
-                                    data-bs-toggle="modal" data-bs-target="#changePasswordModal">Đổi mật
+                            <li class="border-bottom  border-secondary"><a href="#"
+                                    class="text-decoration-none p-2 text-white" data-bs-toggle="modal"
+                                    data-bs-target="#changePasswordModal">Đổi mật
                                     khẩu</a></li>
                             <li><a id="logout" href="user.php?logout=true"
                                     class="p-2 text-decoration-none text-white">Đăng
@@ -354,58 +357,18 @@ if (mysqli_num_rows($sql) === 0) {
                 </div>
             </div>
         </section>
-        <?php
-        $error = "";
-        $succes = "";
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["changepassword"])) {
-            $oldpass = $_POST['oldPassword'];
-            $newpass = $_POST['newPassword'];
-            $confirmpass = $_POST['confirmPassword'];
-
-            if (empty($oldpass) || empty($newpass) || empty($confirmpass)) {
-                $error = "Mời bạn điền đầy đủ thông tin";
-            } elseif ($confirmpass !== $newpass) {
-                $error = "Xác nhận mật khẩu không khớp, mời nhập lại";
-            } else {
-                // Lấy mật khẩu hiện tại của người dùng từ cơ sở dữ liệu
-                $username = $_SESSION['name']; // Sử dụng tên người dùng từ phiên đăng nhập
-                $sql = "SELECT password FROM users WHERE username = '$username'";
-                $result = $conn->query($sql);
-
-                if ($result && $result->num_rows > 0) {
-                    $row = $result->fetch_assoc();
-                    $currentPassword = $row['password'];
-
-                    // So sánh mật khẩu hiện tại với mật khẩu đã nhập
-                    if ($oldpass == $currentPassword) {
-                        $updateSql = "UPDATE users SET password = '$newpass' WHERE username = '$username'";
-                        if ($conn->query($updateSql) === TRUE) {
-                            $succes = "Đổi mật khẩu thành công";
-                        } else {
-                            $error = "Lỗi khi cập nhật mật khẩu: " . $conn->error;
-                        }
-                    } else {
-                        $error = "Mật khẩu cũ không đúng";
-                    }
-                } else {
-                    $error = "Không tìm thấy người dùng";
-                }
-            }
-        }
-        ?>
-
         <!-- Thêm modal vào trang -->
         <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content">
+                <div class="modal-content" style="margin: 200px auto">
                     <div class="modal-header">
                         <h5 class="modal-title" id="changePasswordModalLabel">Đổi mật khẩu</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
 
-                        <form method="post" action="">
+                        <form id="changePasswordForm" method="post" action="">
                             <div class="mb-3">
                                 <label for="oldPassword" class="form-label">Mật khẩu cũ:</label>
                                 <input type="password" class="form-control" id="oldPassword" name="oldPassword"
@@ -421,10 +384,9 @@ if (mysqli_num_rows($sql) === 0) {
                                 <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
                                     required>
                             </div>
-                            <p>
-                                <?php echo $error ?>
-                                <?php echo $succes ?>
-                            </p>
+                            <div id="messageContainer">
+                                <!-- Các thông báo sẽ được hiển thị ở đây -->
+                            </div>
                             <button name="changepassword" type="submit" class="btn btn-primary">Đổi mật khẩu</button>
                         </form>
 

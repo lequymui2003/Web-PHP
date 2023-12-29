@@ -11,6 +11,9 @@
         crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <!-- Include the SweetAlert2 library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="./assets/css/main.css">
     <title>Admin</title>
@@ -48,8 +51,6 @@
                             <i class="bi bi-person-circle icon-user ms-2"></i>
                         </a>
                         <ul id="sub-nav" class="sub-nav position-absolute d-none ps-0 rounded-2">
-                            <!-- <li><a href="#" class="text-decoration-none p-2 text-white">Tài
-                                    khoản</a></li> -->
                             <li><a id="logout" href="admin.php?logout=true"
                                     class="p-2 text-decoration-none text-white">Đăng
                                     xuất</a></li>
