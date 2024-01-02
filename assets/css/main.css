@@ -3,14 +3,8 @@
     padding: 0;
     box-sizing: border-box;
 }
-.max-width-column{
-    max-width: 50px;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Hiển thị dấu chấm (...) nếu có nội dung bị cắt */
-    white-space: nowrap; /* Ngăn chặn việc xuống dòng */
-}
 .custom-scrollbar {
-     /* overflow: hidden; */
+     overflow: hidden;
     height: 100vh; /* Đảm bảo chiều cao toàn trang */
 }
 .mx-h-230{
@@ -22,9 +16,9 @@
 .h-40{
     height: 40%;
 }
-.size-text{
+/* .size-text{
     font-size: 1.1rem;
-}
+} */
 .custom-cursor{
     cursor: pointer;
 }
@@ -44,7 +38,7 @@
     width: 400px;
     height: 100vh;
     right: 0;
-    animation: chuyenDong 1s linear forwards;
+    /* animation: chuyenDong 1s linear forwards; */
 }
 .form-login form{
     margin-bottom: 100px;
@@ -52,14 +46,14 @@
 .form-login form h2{
     height: 50px;
 }
-@keyframes chuyenDong {
+/* @keyframes chuyenDong {
     0% {
       transform: translateX(100%);
     }
     100% {
       transform: translateX(0%);
     }
-}
+} */
 .btn{
     outline: none;
     border: none;

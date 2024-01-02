@@ -153,7 +153,7 @@ require_once 'header.php';
                                             <td>
                                                 <?php echo $row["username"] ?>
                                             </td>
-                                            <td class="max-width-column">
+                                            <td>
                                                 <?php echo $row["password"] ?>
                                             </td>
                                             <td>

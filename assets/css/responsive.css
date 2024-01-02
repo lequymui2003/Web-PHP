@@ -1,0 +1,12 @@
+/*Tablet*/
+@media (min-width: 740px) and (max-width: 1023px){
+    .form-login{
+        width: 100%;
+    };
+}
+/*Mobile*/
+@media (max-width: 739px){
+    .form-login{
+        width:100%;
+    };
+}
