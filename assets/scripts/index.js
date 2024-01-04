@@ -51,8 +51,6 @@ $(document).ready(function(){
             }
         });
     });
-    
-    
 
         // trang chủ
         $("#icon-user").on('click', function(event) {

@@ -157,7 +157,7 @@ if (mysqli_num_rows($sql) === 0) {
     <title>User</title>
 </head>
 
-<body>
+<body class="custom-scrollbar">
     <header class="container-fluid">
         <div class="row row-header">
             <div class="col-xs-12 text-center">
@@ -202,7 +202,6 @@ if (mysqli_num_rows($sql) === 0) {
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 content-pane">
                         <div class="row">
-
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-6 mt-3">
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-12 col-md-12 col-lg-12">
@@ -219,7 +218,7 @@ if (mysqli_num_rows($sql) === 0) {
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-6 mt-3">
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-12 col-md-12 col-lg-12 d-flex flex-row-reverse">
-                                        <form method="post" action="" class="form-search me-4">
+                                        <form method="post" action="" class="form-search me-4 ">
                                             <input type="submit" name="search2" value="Phòng trống"
                                                 class="input-style me-3">
                                             <input type="submit" name="search3" value="Phòng đã đăng ký"
@@ -229,8 +228,8 @@ if (mysqli_num_rows($sql) === 0) {
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 table-responsive mt-3 mb-3">
+                        <div class="row me-1">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 table-responsive mt-3 mx-h-400">
                                 <table id="table"
                                     class="col-xs-12 col-sm-12 col-md-12 col-lg-8 w-100 border-collapse text-center table">
                                     <thead>

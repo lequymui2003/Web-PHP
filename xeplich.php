@@ -51,45 +51,112 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 
 
 // Xử lý sửa
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
-    $id = $_POST["input1"];
-    $idMon = $_POST["input2"];
-    $idLop = $_POST["input3"];
-    $idGV = $_POST["input4"];
-    $idPhong = $_POST["input5"];
-    $TGBD = $_POST["input6"];
-    $TGKT = $_POST["input7"];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST["update"])) {
+        $id = $_POST["input1"];
+        $idMon = $_POST["input2"];
+        $idLop = $_POST["input3"];
+        $idGV = $_POST["input4"];
+        $idPhong = $_POST["input5"];
+        $TGBD = $_POST["input6"];
+        $TGKT = $_POST["input7"];
 
-    $checkUpdateSql = "SELECT * FROM xeplich 
-        WHERE idPhong = '$idPhong' 
-        AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-        OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
-        AND id != '$id'"; // Loại trừ bản ghi hiện tại đang được sửa
+        $checkUpdateSql = "SELECT * FROM xeplich 
+            WHERE idPhong = '$idPhong' 
+            AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
+            OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
+            AND id != '$id'"; // Loại trừ bản ghi hiện tại đang được sửa
 
-    $result = $conn->query($checkUpdateSql);
+        $result = $conn->query($checkUpdateSql);
 
-    if ($result->num_rows > 0) {
-        echo '<script>alert("Thông báo: Phòng này đã có lịch trong khoảng thời gian này!");</script>';
-    } else {
-
-        $updatePHSql = "UPDATE xeplich SET
-            idMon = '$idMon',
-            idLop = '$idLop',
-            idGV = '$idGV',
-            idPhong = '$idPhong',
-            thoiGianBatDau = '$TGBD',
-            TgianKetThuc = '$TGKT'
-        WHERE id = '$id'";
-
-        if ($conn->query($updatePHSql) === TRUE) {
-
+        if ($result->num_rows > 0) {
+            // echo '<script>alert("Thông báo: Phòng này đã có lịch trong khoảng thời gian này!");</script>';
+            echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+            echo '<script>
+                        $(document).ready(function(){
+                            $("#notificationMessage").text("Phòng này đã có lịch trong khoảng thời gian này!");
+                            $("#notificationModal").show();
+                            $(".close").click(function(){
+                            $("#notificationModal").hide();
+                            });
+                        });
+                    </script>';
         } else {
+            // Kiểm tra trùng lịch cho giảng viên
+            $checkSql = "SELECT * FROM xeplich 
+                WHERE idGV = '$idGV' 
+                AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
+                OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
+                AND id != '$id'";
 
+            $result = $conn->query($checkSql);
+
+            if ($result->num_rows > 0) {
+                echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+                echo '<script>
+                    $(document).ready(function(){
+                        $("#notificationMessage").text("Giảng viên này đã có lịch dạy trong khoảng thời gian này!");
+                        $("#notificationModal").show();
+                        $(".close").click(function(){
+                        $("#notificationModal").hide();
+                        });
+                    });
+                </script>';
+            } else {
+                // Kiểm tra trùng lịch cho lớp học
+                $checkSql = "SELECT * FROM xeplich 
+                    WHERE idLop = '$idLop' 
+                    AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
+                    OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
+                    AND id != '$id'";
+
+                $result = $conn->query($checkSql);
+
+                if ($result->num_rows > 0) {
+                    // echo '<script>alert("Thông báo: Lớp đã có lịch học trong khoảng thời gian này!");</script>';
+                    echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+                    echo '<script>
+                                $(document).ready(function(){
+                                    $("#notificationMessage").text("Lớp này đã có lịch trong khoảng thời gian này!");
+                                    $("#notificationModal").show();
+                                    $(".close").click(function(){
+                                    $("#notificationModal").hide();
+                                    });
+                                });
+                            </script>';
+                } else {
+                    // Tiến hành cập nhật dữ liệu vào cơ sở dữ liệu
+                    $updatePHSql = "UPDATE xeplich SET
+                        idMon = '$idMon',
+                        idLop = '$idLop',
+                        idGV = '$idGV',
+                        idPhong = '$idPhong',
+                        thoiGianBatDau = '$TGBD',
+                        TgianKetThuc = '$TGKT'
+                    WHERE id = '$id'";
+
+                    if ($conn->query($updatePHSql) === TRUE) {
+                        echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+                        echo '<script>
+                                    $(document).ready(function(){
+                                        $("#notificationMessage").text("Sửa thành công!");
+                                        $("#notificationModal").show();
+                                        $(".close").click(function(){
+                                        $("#notificationModal").hide();
+                                        });
+                                    });
+                                </script>';
+                    } else {
+
+                    }
+                }
+            }
         }
     }
 }
 
-// chức năng sửa
+
+// chức năng thêm
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     // Lấy dữ liệu từ form thêm
     $id = $_POST["input1"];
@@ -111,7 +178,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     // Kiểm tra số lượng hàng trả về
     if ($result->num_rows > 0) {
         // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-        echo '<script>alert("Thông báo: Giáo viên này đã có lịch dạy trong khoảng thời gian này!");</script>';
+        // echo '<script>alert("Thông báo: Giáo viên này đã có lịch dạy trong khoảng thời gian này!");</script>';
+        echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+        echo '<script>
+                    $(document).ready(function(){
+                        $("#notificationMessage").text("Giáo viên này đã có lịch dạy trong khoảng thời gian này!");
+                        $("#notificationModal").show();
+                        $(".close").click(function(){
+                        $("#notificationModal").hide();
+                        });
+                    });
+                </script>';
     } else {
         // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã lớp đã chọn chưa
         $checkSql = "SELECT * FROM xeplich 
@@ -124,7 +201,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
         // Kiểm tra số lượng hàng trả về
         if ($result->num_rows > 0) {
             // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-            echo '<script>alert("Thông báo: Lớp này đã có lịch trong khoảng thời gian này!");</script>';
+            // echo '<script>alert("Thông báo: Lớp này đã có lịch trong khoảng thời gian này!");</script>';
+            echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+            echo '<script>
+                        $(document).ready(function(){
+                            $("#notificationMessage").text("Lớp này đã có lịch trong khoảng thời gian này!");
+                            $("#notificationModal").show();
+                            $(".close").click(function(){
+                            $("#notificationModal").hide();
+                            });
+                        });
+                    </script>';
         } else {
             // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã phòng đã chọn chưa
             $checkSql = "SELECT * FROM xeplich 
@@ -137,7 +224,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
             // Kiểm tra số lượng hàng trả về
             if ($result->num_rows > 0) {
                 // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-                echo '<script>alert("Thông báo: Phòng này đã có lịch trong khoảng thời gian này!");</script>';
+                // echo '<script>alert("Thông báo: Phòng này đã có lịch trong khoảng thời gian này!");</script>';
+                echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+                echo '<script>
+                            $(document).ready(function(){
+                                $("#notificationMessage").text("Phòng này đã có lịch trong khoảng thời gian này!");
+                                $("#notificationModal").show();
+                                $(".close").click(function(){
+                                $("#notificationModal").hide();
+                                });
+                            });
+                        </script>';
             } else {
                 // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
                 $insertPHSql = "INSERT INTO xeplich (id, idMon, idLop, idGV, idPhong, thoiGianBatDau, TgianKetThuc) 
@@ -146,6 +243,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
                 // Thực hiện câu lệnh INSERT và kiểm tra kết quả
                 if ($conn->query($insertPHSql) === TRUE) {
                     // Thêm dữ liệu thành công
+                    echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
+                    echo '<script>
+                                $(document).ready(function(){
+                                    $("#notificationMessage").text("Thêm thành công!");
+                                    $("#notificationModal").show();
+                                    $(".close").click(function(){
+                                    $("#notificationModal").hide();
+                                    });
+                                });
+                            </script>';
                 } else {
                     // Xử lý khi thêm dữ liệu thất bại
                 }
@@ -300,7 +407,7 @@ require_once 'header.php';
                                         <input float="left" type="text" placeholder="Nhập ID" style="padding: 2px 3px;"
                                             class="rounded" name="input1">
                                     </div>
-                                    <div class="d-flex flex-column ms-2">
+                                    <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">ID Môn: </label>
                                         <?php
                                         $getEmptyRoomsSql = "SELECT idMon FROM monhoc";
@@ -367,15 +474,16 @@ require_once 'header.php';
                                         }
                                         ?>
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2">
-                                        <label for="">Thời gian bắt đầu: </label>
+                                    <div class="d-flex ms-2 mt-2">
+                                        <label for="">Bắt đầu: </label>
                                         <input type="datetime-local" placeholder="Nhập số lượng"
-                                            style="padding: 2px 3px" class="rounded" name="input6">
+                                            style="padding: 2px 3px; margin-left: 8px" class="rounded w-75"
+                                            name="input6">
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2">
-                                        <label for="">Thời gian kết thúc: </label>
+                                    <div class="d-flex ms-2 mt-2">
+                                        <label for="">Kết thúc: </label>
                                         <input type="datetime-local" placeholder="Nhập số lượng"
-                                            style="padding: 2px 3px" class="rounded" name="input7">
+                                            style="padding: 2px 3px" class="rounded w-75 ms-1" name="input7">
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-3">
                                         <div>
@@ -393,6 +501,17 @@ require_once 'header.php';
             </div>
         </div>
     </section>
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <div class="d-flex justify-content-between align-items-end bg-warning ps-2 pe-2 rounded-top">
+                <h4>Thông báo</h4>
+                <span class="close fs-2 fw-bold">&times;</span>
+            </div>
+            <div class="mt-4 pe-2 ps-2 ">
+                <p id="notificationMessage"></p>
+            </div>
+        </div>
+    </div>
 </main>
 <!-- <?php
 require_once 'footer.php';
