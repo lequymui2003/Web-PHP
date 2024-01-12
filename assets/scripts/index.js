@@ -106,6 +106,21 @@ $(document).ready(function(){
                 });
             }
         });
+
+        $('#input1').change(function() {
+            var selectedId = $(this).val();
+            $.ajax({
+                url: 'get_name.php',
+                type: 'GET',
+                data: { id: selectedId },
+                success: function(response) {
+                    $('#input2').val(response);
+                },
+                error: function() {
+                    $('#input2').val('Không có tên');
+                }
+            });
+        });
         
 });
 

@@ -55,8 +55,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idLop = $_POST["input1"];
     $nameLop = $_POST["input2"];
+    $idKhoa = $_POST["input3"];
 
-    $updatePHSql = "UPDATE lop SET tenLop = '$nameLop'
+    $updatePHSql = "UPDATE lop SET tenLop = '$nameLop', idKhoa='$idKhoa'
     WHERE idLop = '$idLop'";
     if ($conn->query($updatePHSql) === TRUE) {
     } else {
@@ -66,8 +67,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idLop = $_POST["input1"];
     $nameLop = $_POST["input2"];
+    $idKhoa = $_POST["input3"];
 
-    $insertPHSql = "INSERT INTO lop (idLop, tenLop)  VALUES ('$idLop', '$nameLop')";
+    $insertPHSql = "INSERT INTO lop (idLop, tenLop, idKhoa)  VALUES ('$idLop', '$nameLop', '$idKhoa')";
     if ($conn->query($insertPHSql) === TRUE) {
     } else {
     }
@@ -81,7 +83,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     } else {
     }
 }
-$sql = mysqli_query($conn, "SELECT * FROM lop");
+$sql = mysqli_query($conn, "SELECT lop.idLop, lop.tenLop, 
+lop.idKhoa, khoa.tenKhoa 
+FROM lop 
+join khoa on khoa.idKhoa = lop.idKhoa");
 if (mysqli_num_rows($sql) === 0) {
 }
 ?>
@@ -100,6 +105,8 @@ require_once 'header.php';
                                 <tr class="table-dark text-white">
                                     <th>ID Lớp</th>
                                     <th>Tên Lớp</th>
+                                    <th>ID Khoa</th>
+                                    <th>Tên Khoa</th>
                                     <th>Chức năng</th>
                                 </tr>
                             </thead>
@@ -116,6 +123,12 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["tenLop"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["idKhoa"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["tenKhoa"] ?>
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
@@ -141,6 +154,12 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $row["tenLop"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["idKhoa"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["tenKhoa"] ?>
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
@@ -179,6 +198,23 @@ require_once 'header.php';
                                         <label for="">Tên lớp: </label>
                                         <input type="text" placeholder="Nhập tên lớp" style="padding: 2px 3px;"
                                             class="rounded" name="input2">
+                                    </div>
+                                    <div class="d-flex flex-column ms-2 mt-2">
+                                        <label for="">ID Khoa: </label>
+                                        <?php
+                                        $getEmptyRoomsSql = "SELECT idKhoa FROM khoa";
+                                        $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
+
+                                        if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
+                                            echo '<select name="input3" class="rounded" style="padding: 2px 3px;">';
+                                            while ($row = $emptyRoomsResult->fetch_assoc()) {
+                                                echo '<option value="' . $row['idKhoa'] . '">' . $row['idKhoa'] . '</option>';
+                                            }
+                                            echo '</select>';
+                                        } else {
+
+                                        }
+                                        ?>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

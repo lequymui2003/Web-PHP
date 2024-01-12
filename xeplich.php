@@ -53,13 +53,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["update"])) {
-        $id = $_POST["input1"];
-        $idMon = $_POST["input2"];
-        $idLop = $_POST["input3"];
+        $idKhoa = $_POST["input1"];
+        $idMon = $_POST["input3"];
+        $idLop = $_POST["input2"];
         $idGV = $_POST["input4"];
         $idPhong = $_POST["input5"];
         $TGBD = $_POST["input6"];
         $TGKT = $_POST["input7"];
+
+        $result = mysqli_query($conn, "SELECT * FROM xeplich");
+        $row = mysqli_fetch_assoc($result);
+        $id = $row['id'];
 
         $checkUpdateSql = "SELECT * FROM xeplich 
             WHERE idPhong = '$idPhong' 
@@ -131,6 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         idLop = '$idLop',
                         idGV = '$idGV',
                         idPhong = '$idPhong',
+                        idKhoa = '$idKhoa',
                         thoiGianBatDau = '$TGBD',
                         TgianKetThuc = '$TGKT'
                     WHERE id = '$id'";
@@ -159,9 +164,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // chức năng thêm
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     // Lấy dữ liệu từ form thêm
-    $id = $_POST["input1"];
-    $idMon = $_POST["input2"];
-    $idLop = $_POST["input3"];
+    $idKhoa = $_POST["input1"];
+    $idMon = $_POST["input3"];
+    $idLop = $_POST["input2"];
     $idGV = $_POST["input4"];
     $idPhong = $_POST["input5"];
     $TGBD = $_POST["input6"];
@@ -237,8 +242,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
                         </script>';
             } else {
                 // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
-                $insertPHSql = "INSERT INTO xeplich (id, idMon, idLop, idGV, idPhong, thoiGianBatDau, TgianKetThuc) 
-                                VALUES ('$id','$idMon', '$idLop', '$idGV', '$idPhong','$TGBD', '$TGKT')";
+                $insertPHSql = "INSERT INTO xeplich ( idMon, idLop, idGV, idPhong, idKhoa, thoiGianBatDau, TgianKetThuc) 
+                                VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$TGBD', '$TGKT')";
 
                 // Thực hiện câu lệnh INSERT và kiểm tra kết quả
                 if ($conn->query($insertPHSql) === TRUE) {
@@ -289,11 +294,12 @@ require_once 'header.php';
                             class="col-xs-12 col-sm-12 col-md-12 col-lg-8 w-100 border-collapse text-center table">
                             <thead>
                                 <tr class="table-dark text-white">
-                                    <th>ID </th>
+                                    <!-- <th>ID </th> -->
                                     <th>ID Môn</th>
                                     <th>ID Lớp</th>
                                     <th>ID Giảng viên</th>
                                     <th>ID Phòng</th>
+                                    <th>ID Khoa</th>
                                     <th>Thời gian bắt đầu</th>
                                     <th>Thời gian kết thúc</th>
                                     <th>Tình trạng</th>
@@ -309,9 +315,6 @@ require_once 'header.php';
                                         ?>
                                         <tr class="<?php echo $class ?>">
                                             <td>
-                                                <?php echo $searchResult["id"] ?>
-                                            </td>
-                                            <td>
                                                 <?php echo $searchResult["idMon"] ?>
                                             </td>
                                             <td>
@@ -322,6 +325,9 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["idPhong"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["idKhoa"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["thoiGianBatDau"] ?>
@@ -351,9 +357,6 @@ require_once 'header.php';
                                         ?>
                                         <tr class="<?php echo $class ?>">
                                             <td>
-                                                <?php echo $row["id"] ?>
-                                            </td>
-                                            <td>
                                                 <?php echo $row["idMon"] ?>
                                             </td>
                                             <td>
@@ -364,6 +367,9 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $row["idPhong"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["idKhoa"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $row["thoiGianBatDau"] ?>
@@ -402,36 +408,30 @@ require_once 'header.php';
                         <div class="row mt-2">
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-10">
                                 <form action="" method="post">
-                                    <div class="d-flex flex-column ms-2">
-                                        <label for="">ID: </label>
-                                        <input float="left" type="text" placeholder="Nhập ID" style="padding: 2px 3px;"
-                                            class="rounded" name="input1">
-                                    </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
-                                        <label for="">ID Môn: </label>
+                                        <label for="">ID Khoa: </label>
                                         <?php
-                                        $getEmptyRoomsSql = "SELECT idMon FROM monhoc";
+                                        $getEmptyRoomsSql = "SELECT idKhoa FROM khoa";
                                         $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
 
                                         if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input2" class="rounded" style="padding: 2px 3px;">';
+                                            echo '<select name="input1" class="rounded" style="padding: 2px 3px;">';
                                             while ($row = $emptyRoomsResult->fetch_assoc()) {
-                                                echo '<option value="' . $row['idMon'] . '">' . $row['idMon'] . '</option>';
+                                                echo '<option value="' . $row['idKhoa'] . '">' . $row['idKhoa'] . '</option>';
                                             }
                                             echo '</select>';
                                         } else {
-
                                         }
                                         ?>
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2">
+                                    <div class="d-flex flex-column ms-2 mt-2" id="lopDropdown">
                                         <label for="">ID Lớp: </label>
                                         <?php
                                         $getEmptyRoomsSql = "SELECT idLop FROM lop";
                                         $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
 
                                         if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input3" class="rounded" style="padding: 2px 3px;">';
+                                            echo '<select name="input2" class="rounded" style="padding: 2px 3px;">';
                                             while ($row = $emptyRoomsResult->fetch_assoc()) {
                                                 echo '<option value="' . $row['idLop'] . '">' . $row['idLop'] . '</option>';
                                             }
@@ -441,7 +441,24 @@ require_once 'header.php';
                                         }
                                         ?>
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2">
+                                    <div class="d-flex flex-column ms-2 mt-2" id="monDropdown">
+                                        <label for="">ID Môn: </label>
+                                        <?php
+                                        $getEmptyRoomsSql = "SELECT idMon FROM monhoc";
+                                        $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
+
+                                        if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
+                                            echo '<select name="input3" class="rounded" style="padding: 2px 3px;">';
+                                            while ($row = $emptyRoomsResult->fetch_assoc()) {
+                                                echo '<option value="' . $row['idMon'] . '">' . $row['idMon'] . '</option>';
+                                            }
+                                            echo '</select>';
+                                        } else {
+
+                                        }
+                                        ?>
+                                    </div>
+                                    <div class="d-flex flex-column ms-2 mt-2" id="giangVienDropdown">
                                         <label for="">ID Giảng viên: </label>
                                         <?php
                                         $getEmptyRoomsSql = "SELECT idGiangVien FROM giangvien";
@@ -485,7 +502,7 @@ require_once 'header.php';
                                         <input type="datetime-local" placeholder="Nhập số lượng"
                                             style="padding: 2px 3px" class="rounded w-75 ms-1" name="input7">
                                     </div>
-                                    <div class="d-flex  justify-content-between  ms-2 mt-3">
+                                    <div class="d-flex  justify-content-between  ms-2 mt-2">
                                         <div>
                                             <input type="submit" name="add" value="Thêm" class="input-style">
                                         </div>

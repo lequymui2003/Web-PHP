@@ -31,9 +31,10 @@
 
     <section class="container-fluid">
         <div class="row row-navbar">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9">
-                <ul class="d-flex align-items-center justify-content-between h-100 ps-5 nav nav-tabs">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-10">
+                <ul class="d-flex align-items-center justify-content-between h-100 ps-2 nav nav-tabs">
                     <li><a href="admin.php" class="text-decoration-none ">Quản lý phòng học</a></li>
+                    <li><a href="QLKhoa.php" class="text-decoration-none ">Quản lý Khoa</a></li>
                     <li><a href="QLMon.php" class="text-decoration-none ">Quản lý môn học</a></li>
                     <li><a href="QLGiangvien.php" class="text-decoration-none ">Quản lý giảng viên</a></li>
                     <li><a href="QLLop.php" class="text-decoration-none ">Quản lý lớp</a></li>
@@ -43,9 +44,9 @@
                     <li><a href="Baocaothongke.php" class="text-decoration-none ">Báo cáo thống kê</a></li>
                 </ul>
             </div>
-            <div class="col-xs-8 col-sm-6 col-md-6 col-lg-3">
+            <div class="col-xs-8 col-sm-6 col-md-6 col-lg-2">
 
-                <ul class="d-flex align-items-center h-100 float-end pe-5">
+                <ul class="d-flex align-items-center h-100 float-end pe-2">
                     <li class="text-white">Admin</li>
                     <li>
                         <a href="#" id="icon-user">

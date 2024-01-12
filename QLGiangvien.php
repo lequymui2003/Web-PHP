@@ -56,8 +56,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idGV = $_POST["input1"];
     $SDT = $_POST["input3"];
     $name = $_POST["input2"];
+    $idKhoa = $_POST["input4"];
 
-    $updatePHSql = "UPDATE giangvien SET sdt = '$SDT', tenGV = '$name' 
+    $updatePHSql = "UPDATE giangvien SET sdt = '$SDT', tenGV = '$name', idKhoa = '$idKhoa'
     WHERE idGiangVien = '$idGV'";
     if ($conn->query($updatePHSql) === TRUE) {
     } else {
@@ -68,9 +69,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idGV = $_POST["input1"];
     $SDT = $_POST["input3"];
     $name = $_POST["input2"];
+    $idKhoa = $_POST["input4"];
 
-    $insertPHSql = "INSERT INTO giangvien (idGiangVien, sdt, tenGV) 
-                      VALUES ('$idGV', '$SDT', '$name')";
+    $insertPHSql = "INSERT INTO giangvien (idGiangVien, sdt, tenGV, idKhoa) 
+                      VALUES ('$idGV', '$SDT', '$name', '$idKhoa')";
     if ($conn->query($insertPHSql) === TRUE) {
     } else {
     }
@@ -84,7 +86,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     } else {
     }
 }
-$sql = mysqli_query($conn, "SELECT * FROM giangvien");
+$sql = mysqli_query($conn, "SELECT giangvien.idGiangVien, giangvien.sdt, 
+giangvien.tenGV, giangvien.idKhoa, khoa.tenKhoa, khoa.idKhoa FROM giangvien 
+join khoa on giangvien.idKhoa = khoa.idKhoa");
 if (mysqli_num_rows($sql) === 0) {
 }
 ?>
@@ -95,7 +99,7 @@ require_once 'header.php';
     <section class="container-fluid">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-8 content-pane d-flex">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-10 content-pane d-flex">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-8 table-responsive mt-3 ms-3 mb-3">
                         <table id="table"
                             class="col-xs-12 col-sm-12 col-md-12 col-lg-8 w-100 border-collapse text-center table">
@@ -104,6 +108,8 @@ require_once 'header.php';
                                     <th>ID Giảng Viên</th>
                                     <th>Họ và tên</th>
                                     <th>Số điện thoại</th>
+                                    <th>ID Khoa</th>
+                                    <th>Tên Khoa</th>
                                     <th>Chức năng</th>
                                 </tr>
                             </thead>
@@ -123,6 +129,12 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["sdt"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["idKhoa"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["tenKhoa"] ?>
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
@@ -151,6 +163,12 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $row["sdt"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["idKhoa"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["tenKhoa"] ?>
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
@@ -195,6 +213,23 @@ require_once 'header.php';
                                         <label for="">Số điện thoại: </label>
                                         <input type="text" placeholder="Nhập số điện thoại" style="padding: 2px 3px"
                                             class="rounded" name="input3">
+                                    </div>
+                                    <div class="d-flex flex-column ms-2 mt-2">
+                                        <label for="">ID Khoa: </label>
+                                        <?php
+                                        $getEmptyRoomsSql = "SELECT idKhoa FROM khoa";
+                                        $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
+
+                                        if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
+                                            echo '<select name="input4" class="rounded" style="padding: 2px 3px;">';
+                                            while ($row = $emptyRoomsResult->fetch_assoc()) {
+                                                echo '<option value="' . $row['idKhoa'] . '">' . $row['idKhoa'] . '</option>';
+                                            }
+                                            echo '</select>';
+                                        } else {
+
+                                        }
+                                        ?>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

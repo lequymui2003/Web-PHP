@@ -55,11 +55,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
-    $idKhoa = $_POST["input3"];
 
-
-    $updatePHSql = "UPDATE phonghoc SET tenphong = '$namePH', 
-    idKhoa = '$idKhoa'
+    $updatePHSql = "UPDATE phonghoc SET tenphong = '$namePH'
     WHERE idPhong = '$idPH'";
     if ($conn->query($updatePHSql) === TRUE) {
     } else {
@@ -69,11 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
-    $idKhoa = $_POST["input3"];
 
-
-    $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong, idKhoa) 
-                      VALUES ('$idPH', '$namePH', '$idKhoa')";
+    $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong) 
+                      VALUES ('$idPH', '$namePH'')";
     if ($conn->query($insertPHSql) === TRUE) {
     } else {
     }
@@ -106,8 +101,6 @@ require_once 'header.php';
                                 <tr class="table-dark text-white">
                                     <th>ID Phòng</th>
                                     <th>Tên Phòng</th>
-                                    <th>ID Khoa</th>
-                                    <!-- <th>Tình trạng</th> -->
                                     <th>Chức năng</th>
                                 </tr>
                             </thead>
@@ -125,12 +118,6 @@ require_once 'header.php';
                                             <td>
                                                 <?php echo $searchResult["tenPhong"] ?>
                                             </td>
-                                            <td>
-                                                <?php echo $searchResult["idKhoa"] ?>
-                                            </td>
-                                            <!-- <td>
-                                                <?php echo $searchResult["tinhTrang"] ?>
-                                            </td> -->
                                             <td>
                                                 <form action="" method='post'>
                                                     <input type="hidden" name="IDPhonghoc"
@@ -156,12 +143,6 @@ require_once 'header.php';
                                             <td>
                                                 <?php echo $row["tenPhong"] ?>
                                             </td>
-                                            <td>
-                                                <?php echo $row["idKhoa"] ?>
-                                            </td>
-                                            <!-- <td>
-                                                <?php echo $row["tinhTrang"] ?>
-                                            </td> -->
                                             <td>
                                                 <form action="" method='post'>
                                                     <input type="hidden" name="IDPhonghoc"
@@ -200,23 +181,6 @@ require_once 'header.php';
                                         <label for="">Tên phòng: </label>
                                         <input type="text" placeholder="Nhập tên phòng"
                                             style="padding: 2px 3px; text-align:left;" class="rounded" name="input2">
-                                    </div>
-                                    <div class="d-flex flex-column ms-2 mt-2">
-                                        <label for="">ID Khoa: </label>
-                                        <?php
-                                        $getEmptyRoomsSql = "SELECT idKhoa FROM khoa";
-                                        $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
-
-                                        if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input4" class="rounded" style="padding: 2px 3px;">';
-                                            while ($row = $emptyRoomsResult->fetch_assoc()) {
-                                                echo '<option value="' . $row['idKhoa'] . '">' . $row['idKhoa'] . '</option>';
-                                            }
-                                            echo '</select>';
-                                        } else {
-
-                                        }
-                                        ?>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>
