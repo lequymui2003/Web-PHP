@@ -49,30 +49,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     }
 }
 
-
-
-// Xử lý sửa
+$error = "";
+$succes = "";
+// xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
 
-    $updatePHSql = "UPDATE phonghoc SET tenphong = '$namePH'
-    WHERE idPhong = '$idPH'";
-    if ($conn->query($updatePHSql) === TRUE) {
+    // Kiểm tra xem Tên Phòng đã tồn tại chưa (loại trừ phòng đang sửa)
+    $checkDuplicateSql = "SELECT * FROM phonghoc WHERE tenPhong = '$namePH' AND idPhong != '$idPH'";
+    $result = $conn->query($checkDuplicateSql);
+
+    if ($result->num_rows > 0) {
+        // Tên Phòng đã tồn tại (trừ phòng đang sửa), thông báo lỗi
+        $error = "Tên Phòng đã tồn tại.";
     } else {
+        // Thực hiện cập nhật khi không có trùng lặp
+        $updatePHSql = "UPDATE phonghoc SET tenPhong = '$namePH' WHERE idPhong = '$idPH'";
+
+        if ($conn->query($updatePHSql) === TRUE) {
+            // Cập nhật thành công
+            $succes = "Cập nhật thành công.";
+        } else {
+            // Lỗi khi cập nhật
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
 
-    $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong) 
-                      VALUES ('$idPH', '$namePH'')";
-    if ($conn->query($insertPHSql) === TRUE) {
+    // Kiểm tra xem ID hoặc Tên Phòng đã tồn tại chưa
+    $checkDuplicateSql = "SELECT * FROM phonghoc WHERE idPhong = '$idPH' or tenPhong = '$namePH'";
+    $result = $conn->query($checkDuplicateSql);
+
+    if ($result->num_rows > 0) {
+        // ID hoặc Tên Phòng đã tồn tại, thông báo lỗi
+        $error = "ID hoặc Tên Phòng đã tồn tại.";
     } else {
+        // Thực hiện thêm mới khi không có trùng lặp
+        $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong) VALUES ('$idPH', '$namePH')";
+
+        if ($conn->query($insertPHSql) === TRUE) {
+            // Thêm mới thành công
+            $succes = "Thêm mới thành công.";
+        } else {
+            // Lỗi khi thêm mới
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $idPhonghoc = $_POST["IDPhonghoc"];
@@ -181,6 +211,14 @@ require_once 'header.php';
                                         <label for="">Tên phòng: </label>
                                         <input type="text" placeholder="Nhập tên phòng"
                                             style="padding: 2px 3px; text-align:left;" class="rounded" name="input2">
+                                    </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

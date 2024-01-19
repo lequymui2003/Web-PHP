@@ -28,7 +28,7 @@ if (isset($_GET['logout'])) {
 $name = "";
 if (isset($_POST['search'])) {
     $searchPHSql = "SELECT phonghoc.idPhong, phonghoc.tenPhong,
-        xeplich.thoiGianBatDau, xeplich.TgianKetThuc  FROM 
+        xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang  FROM 
         phonghoc join xeplich on phonghoc.idPhong = xeplich.idPhong 
         WHERE xeplich.tinhTrang = 'Trống'";
     $result = $conn->query($searchPHSql);
@@ -43,7 +43,7 @@ if (isset($_POST['search'])) {
     }
 } elseif (isset($_POST['search2'])) {
     $searchPHSql = "SELECT phonghoc.idPhong, phonghoc.tenPhong,
-        xeplich.thoiGianBatDau, xeplich.TgianKetThuc  FROM 
+        xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang  FROM 
         phonghoc join xeplich on phonghoc.idPhong = xeplich.idPhong 
         WHERE xeplich.tinhTrang = 'Đã đăng ký'";
     $result = $conn->query($searchPHSql);
@@ -80,14 +80,16 @@ if (isset($_POST['search'])) {
 }
 
 $sql = mysqli_query($conn, "SELECT phonghoc.idPhong, phonghoc.tenPhong,
-xeplich.thoiGianBatDau, xeplich.TgianKetThuc 
+xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
 FROM phonghoc join xeplich on phonghoc.idPhong = xeplich.idPhong");
 if (mysqli_num_rows($sql) === 0) {
 }
 
 $sql2 = mysqli_query($conn, "SELECT cosovatchat.ten, ctcosovatchat.SoLuongTot,
-ctcosovatchat.SoLuongXau
-FROM cosovatchat join ctcosovatchat on cosovatchat.id = ctcosovatchat.id");
+ctcosovatchat.SoLuongXau, ctcosovatchat.idPhong, phonghoc.tenPhong
+FROM  ctcosovatchat
+join cosovatchat on cosovatchat.id = ctcosovatchat.id
+join phonghoc on ctcosovatchat.idPhong = phonghoc.idPhong");
 if (mysqli_num_rows($sql2) === 0) {
 }
 ?>
@@ -111,6 +113,7 @@ require_once 'header.php';
                                             <th>Tên Phòng</th>
                                             <th>Thời gian bắt đầu</th>
                                             <th>Thời gian kết thúc</th>
+                                            <th>Tình trạng</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -132,6 +135,9 @@ require_once 'header.php';
                                                     </td>
                                                     <td>
                                                         <?php echo $searchResult["TgianKetThuc"] ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $searchResult["tinhTrang"] ?>
                                                     </td>
                                                 </tr>
                                                 <?php
@@ -156,6 +162,9 @@ require_once 'header.php';
                                                     </td>
                                                     <td>
                                                         <?php echo $row["TgianKetThuc"] ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $row["tinhTrang"] ?>
                                                     </td>
                                                 </tr>
                                                 <?php
@@ -192,6 +201,8 @@ require_once 'header.php';
                                     class="col-xs-12 col-sm-12 col-md-12 col-lg-8 w-100 border-collapse text-center table">
                                     <thead>
                                         <tr class="table-dark text-white">
+                                            <th>ID Phòng</th>
+                                            <th>Tên Phòng</th>
                                             <th>Tên dụng cụ</th>
                                             <th>Số lượng tốt</th>
                                             <th>Số lượng xấu</th>
@@ -205,6 +216,12 @@ require_once 'header.php';
                                                 $class = ($i % 2 != 0) ? "table-secondary" : "";
                                                 ?>
                                                 <tr class="<?php echo $class ?>">
+                                                    <td>
+                                                        <?php echo $searchResult["idPhong"] ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $searchResult["tenPhong"] ?>
+                                                    </td>
                                                     <td>
                                                         <?php echo $searchResult["ten"] ?>
                                                     </td>
@@ -226,6 +243,12 @@ require_once 'header.php';
                                                 $class = ($i % 2 != 0) ? "table-secondary" : "";
                                                 ?>
                                                 <tr class="<?php echo $class ?>">
+                                                    <td>
+                                                        <?php echo $row["idPhong"] ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $row["tenPhong"] ?>
+                                                    </td>
                                                     <td>
                                                         <?php echo $row["ten"] ?>
                                                     </td>

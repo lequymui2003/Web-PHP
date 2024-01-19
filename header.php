@@ -64,5 +64,4 @@
     </section>
     <script src="./assets/scripts/index.js"></script>
 </body>
-
 </html>

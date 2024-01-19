@@ -49,7 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     }
 }
 
-
+$error = "";
+$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["update"])) {
@@ -74,17 +75,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $result = $conn->query($checkUpdateSql);
 
         if ($result->num_rows > 0) {
-            // echo '<script>alert("Thông báo: Phòng này đã có lịch trong khoảng thời gian này!");</script>';
-            echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-            echo '<script>
-                        $(document).ready(function(){
-                            $("#notificationMessage").text("Phòng này đã có lịch trong khoảng thời gian này!");
-                            $("#notificationModal").show();
-                            $(".close").click(function(){
-                            $("#notificationModal").hide();
-                            });
-                        });
-                    </script>';
+            $error = "Phòng này đã có lịch trong khoảng thời gian này!";
+
         } else {
             // Kiểm tra trùng lịch cho giảng viên
             $checkSql = "SELECT * FROM xeplich 
@@ -96,16 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $result = $conn->query($checkSql);
 
             if ($result->num_rows > 0) {
-                echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-                echo '<script>
-                    $(document).ready(function(){
-                        $("#notificationMessage").text("Giảng viên này đã có lịch dạy trong khoảng thời gian này!");
-                        $("#notificationModal").show();
-                        $(".close").click(function(){
-                        $("#notificationModal").hide();
-                        });
-                    });
-                </script>';
+                $error = "Giảng viên này đã có lịch trong khoảng thời gian này!";
             } else {
                 // Kiểm tra trùng lịch cho lớp học
                 $checkSql = "SELECT * FROM xeplich 
@@ -117,17 +100,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $result = $conn->query($checkSql);
 
                 if ($result->num_rows > 0) {
-                    // echo '<script>alert("Thông báo: Lớp đã có lịch học trong khoảng thời gian này!");</script>';
-                    echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-                    echo '<script>
-                                $(document).ready(function(){
-                                    $("#notificationMessage").text("Lớp này đã có lịch trong khoảng thời gian này!");
-                                    $("#notificationModal").show();
-                                    $(".close").click(function(){
-                                    $("#notificationModal").hide();
-                                    });
-                                });
-                            </script>';
+                    $error = "Lớp đã có lịch học trong khoảng thời gian này!";
+
                 } else {
                     // Tiến hành cập nhật dữ liệu vào cơ sở dữ liệu
                     $updatePHSql = "UPDATE xeplich SET
@@ -141,18 +115,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     WHERE id = '$id'";
 
                     if ($conn->query($updatePHSql) === TRUE) {
-                        echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-                        echo '<script>
-                                    $(document).ready(function(){
-                                        $("#notificationMessage").text("Sửa thành công!");
-                                        $("#notificationModal").show();
-                                        $(".close").click(function(){
-                                        $("#notificationModal").hide();
-                                        });
-                                    });
-                                </script>';
+                        $succes = "Cập nhật thông tin lịch học thành công";
                     } else {
-
+                        $error = "Sửa lịch học thất bại";
                     }
                 }
             }
@@ -183,17 +148,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     // Kiểm tra số lượng hàng trả về
     if ($result->num_rows > 0) {
         // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-        // echo '<script>alert("Thông báo: Giáo viên này đã có lịch dạy trong khoảng thời gian này!");</script>';
-        echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-        echo '<script>
-                    $(document).ready(function(){
-                        $("#notificationMessage").text("Giáo viên này đã có lịch dạy trong khoảng thời gian này!");
-                        $("#notificationModal").show();
-                        $(".close").click(function(){
-                        $("#notificationModal").hide();
-                        });
-                    });
-                </script>';
+        $error = "Giáo viên này đã có lịch dạy trong khoảng thời gian này!";
+
     } else {
         // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã lớp đã chọn chưa
         $checkSql = "SELECT * FROM xeplich 
@@ -206,17 +162,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
         // Kiểm tra số lượng hàng trả về
         if ($result->num_rows > 0) {
             // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-            // echo '<script>alert("Thông báo: Lớp này đã có lịch trong khoảng thời gian này!");</script>';
-            echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-            echo '<script>
-                        $(document).ready(function(){
-                            $("#notificationMessage").text("Lớp này đã có lịch trong khoảng thời gian này!");
-                            $("#notificationModal").show();
-                            $(".close").click(function(){
-                            $("#notificationModal").hide();
-                            });
-                        });
-                    </script>';
+            $error = " Lớp này đã có lịch trong khoảng thời gian này!";
+
         } else {
             // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã phòng đã chọn chưa
             $checkSql = "SELECT * FROM xeplich 
@@ -229,37 +176,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
             // Kiểm tra số lượng hàng trả về
             if ($result->num_rows > 0) {
                 // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-                // echo '<script>alert("Thông báo: Phòng này đã có lịch trong khoảng thời gian này!");</script>';
-                echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-                echo '<script>
-                            $(document).ready(function(){
-                                $("#notificationMessage").text("Phòng này đã có lịch trong khoảng thời gian này!");
-                                $("#notificationModal").show();
-                                $(".close").click(function(){
-                                $("#notificationModal").hide();
-                                });
-                            });
-                        </script>';
+                $error = "Phòng này đã có lịch trong khoảng thời gian này!";
+
             } else {
                 // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
                 $insertPHSql = "INSERT INTO xeplich ( idMon, idLop, idGV, idPhong, idKhoa, thoiGianBatDau, TgianKetThuc) 
                                 VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$TGBD', '$TGKT')";
 
+
                 // Thực hiện câu lệnh INSERT và kiểm tra kết quả
                 if ($conn->query($insertPHSql) === TRUE) {
                     // Thêm dữ liệu thành công
-                    echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>';
-                    echo '<script>
-                                $(document).ready(function(){
-                                    $("#notificationMessage").text("Thêm thành công!");
-                                    $("#notificationModal").show();
-                                    $(".close").click(function(){
-                                    $("#notificationModal").hide();
-                                    });
-                                });
-                            </script>';
+                    $succes = "Thêm lịch học thành công";
                 } else {
                     // Xử lý khi thêm dữ liệu thất bại
+                    $error = "Thêm lịch học thất bại";
                 }
             }
         }
@@ -277,6 +208,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     } else {
     }
 }
+
 $sql = mysqli_query($conn, "SELECT * FROM xeplich");
 if (mysqli_num_rows($sql) === 0) {
 }
@@ -289,7 +221,7 @@ require_once 'header.php';
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-11 content-pane d-flex">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9 table-responsive mt-3 ms-3 mb-3">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9 table-responsive mt-3 ms-3 mb-3 flex-wrap">
                         <table id="table"
                             class="col-xs-12 col-sm-12 col-md-12 col-lg-8 w-100 border-collapse text-center table">
                             <thead>
@@ -394,8 +326,10 @@ require_once 'header.php';
                                 ?>
                             </tbody>
                         </table>
+
                     </div>
-                    <div class="col-xs-4 col-sm-12 col-md-12 col-lg-3 mt-3">
+
+                    <div class="col-xs-4 col-sm-12 col-md-12 col-lg-3 mt-3 ">
                         <div class="row">
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-12">
                                 <form method="post" action="" class="d-flex justify-content-around form-search">
@@ -408,14 +342,14 @@ require_once 'header.php';
                         <div class="row mt-2">
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-10">
                                 <form action="" method="post">
-                                    <div class="d-flex flex-column ms-2 mt-2">
+                                    <div class="d-flex justify-content-between ms-2 mt-2">
                                         <label for="">ID Khoa: </label>
                                         <?php
                                         $getEmptyRoomsSql = "SELECT idKhoa FROM khoa";
                                         $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
 
                                         if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input1" class="rounded" style="padding: 2px 3px;">';
+                                            echo '<select id="input1" name="input1" class="rounded w-75" style="padding: 2px 3px;">';
                                             while ($row = $emptyRoomsResult->fetch_assoc()) {
                                                 echo '<option value="' . $row['idKhoa'] . '">' . $row['idKhoa'] . '</option>';
                                             }
@@ -424,65 +358,31 @@ require_once 'header.php';
                                         }
                                         ?>
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2" id="lopDropdown">
+                                    <div class="d-flex justify-content-between  ms-2 mt-2">
                                         <label for="">ID Lớp: </label>
-                                        <?php
-                                        $getEmptyRoomsSql = "SELECT idLop FROM lop";
-                                        $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
-
-                                        if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input2" class="rounded" style="padding: 2px 3px;">';
-                                            while ($row = $emptyRoomsResult->fetch_assoc()) {
-                                                echo '<option value="' . $row['idLop'] . '">' . $row['idLop'] . '</option>';
-                                            }
-                                            echo '</select>';
-                                        } else {
-
-                                        }
-                                        ?>
+                                        <select id="input2" name="input2" class="rounded w-75"
+                                            style="padding: 2px 3px;">
+                                        </select>
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2" id="monDropdown">
+                                    <div class="d-flex justify-content-between  ms-2 mt-2" id="monDropdown">
                                         <label for="">ID Môn: </label>
-                                        <?php
-                                        $getEmptyRoomsSql = "SELECT idMon FROM monhoc";
-                                        $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
-
-                                        if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input3" class="rounded" style="padding: 2px 3px;">';
-                                            while ($row = $emptyRoomsResult->fetch_assoc()) {
-                                                echo '<option value="' . $row['idMon'] . '">' . $row['idMon'] . '</option>';
-                                            }
-                                            echo '</select>';
-                                        } else {
-
-                                        }
-                                        ?>
+                                        <select id="input3" name="input3" class="rounded w-75"
+                                            style="padding: 2px 3px;"></select>
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2" id="giangVienDropdown">
+                                    <div class="d-flex justify-content-between  ms-2 mt-2" id="giangVienDropdown">
                                         <label for="">ID Giảng viên: </label>
-                                        <?php
-                                        $getEmptyRoomsSql = "SELECT idGiangVien FROM giangvien";
-                                        $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
-
-                                        if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input4" class="rounded" style="padding: 2px 3px;">';
-                                            while ($row = $emptyRoomsResult->fetch_assoc()) {
-                                                echo '<option value="' . $row['idGiangVien'] . '">' . $row['idGiangVien'] . '</option>';
-                                            }
-                                            echo '</select>';
-                                        } else {
-
-                                        }
-                                        ?>
+                                        <select id="input4" name="input4" class="rounded w-50"
+                                            style="padding: 2px 3px;">
+                                        </select>
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2">
+                                    <div class="d-flex justify-content-between  ms-2 mt-2">
                                         <label for="">ID Phòng: </label>
                                         <?php
                                         $getEmptyRoomsSql = "SELECT idPhong FROM phonghoc";
                                         $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
 
                                         if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
-                                            echo '<select name="input5" class="rounded" style="padding: 2px 3px;">';
+                                            echo '<select name="input5" class="rounded w-50" style="padding: 2px 3px;">';
                                             while ($row = $emptyRoomsResult->fetch_assoc()) {
                                                 echo '<option value="' . $row['idPhong'] . '">' . $row['idPhong'] . '</option>';
                                             }
@@ -502,6 +402,14 @@ require_once 'header.php';
                                         <input type="datetime-local" placeholder="Nhập số lượng"
                                             style="padding: 2px 3px" class="rounded w-75 ms-1" name="input7">
                                     </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
+                                    </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-2">
                                         <div>
                                             <input type="submit" name="add" value="Thêm" class="input-style">
@@ -514,21 +422,11 @@ require_once 'header.php';
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </section>
-    <div id="notificationModal" class="modal">
-        <div class="modal-content">
-            <div class="d-flex justify-content-between align-items-end bg-warning ps-2 pe-2 rounded-top">
-                <h4>Thông báo</h4>
-                <span class="close fs-2 fw-bold">&times;</span>
-            </div>
-            <div class="mt-4 pe-2 ps-2 ">
-                <p id="notificationMessage"></p>
-            </div>
-        </div>
-    </div>
 </main>
 <!-- <?php
 require_once 'footer.php';

@@ -107,6 +107,7 @@ $(document).ready(function(){
             }
         });
 
+        // lấy dữ liệu tên cơ sở vật chất khi lựa chọn idcsvc
         $('#input1').change(function() {
             var selectedId = $(this).val();
             $.ajax({
@@ -121,6 +122,62 @@ $(document).ready(function(){
                 }
             });
         });
+
+        // lấy dữ liệu idLop khi lựa chọn idKhoa
+        $("#input1").change(function() {
+            var selectedValue = $(this).val();
+            console.log('ID Khoa được chọn:', selectedValue);
+
+           // Sử dụng giá trị đã chọn để thực hiện yêu cầu AJAX
+            $.ajax({
+                type: "POST",
+                url: "getLopData.php", // Thay đổi đường dẫn tới tệp xử lý AJAX
+                data: { idKhoa: selectedValue },
+                success: function(data) {
+                    console.log('Dữ liệu từ server:', data);
+                    // Cập nhật dropdown "ID Lớp" với dữ liệu mới từ server
+                    $("#input2").html(data);
+                }
+            });
+        });
         
+        // lấy dữ liệu idMon khi lựa chọn idKhoa
+        $("#input1").change(function() {
+            var selectedValue = $(this).val();
+            console.log('ID Khoa được chọn:', selectedValue);
+
+           // Sử dụng giá trị đã chọn để thực hiện yêu cầu AJAX
+            $.ajax({
+                type: "POST",
+                url: "getMonData.php", // Thay đổi đường dẫn tới tệp xử lý AJAX
+                data: { idKhoa: selectedValue },
+                success: function(data) {
+                    console.log('Dữ liệu từ server:', data);
+                    // Cập nhật dropdown "ID Lớp" với dữ liệu mới từ server
+                    $("#input3").html(data);
+                }
+            });
+        });
+     
+        // lấy dữ liệu idGV khi lựa chọn idKhoa
+        $("#input1").change(function() {
+            var selectedValue = $(this).val();
+            console.log('ID Khoa được chọn:', selectedValue);
+
+           // Sử dụng giá trị đã chọn để thực hiện yêu cầu AJAX
+            $.ajax({
+                type: "POST",
+                url: "getGVData.php", // Thay đổi đường dẫn tới tệp xử lý AJAX
+                data: { idKhoa: selectedValue },
+                success: function(data) {
+                    console.log('Dữ liệu từ server:', data);
+                    // Cập nhật dropdown "ID Lớp" với dữ liệu mới từ server
+                    $("#input4").html(data);
+                }
+            });
+        });
+     
+
+
 });
 

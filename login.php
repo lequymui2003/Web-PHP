@@ -33,7 +33,7 @@ if (isset($_COOKIE['username']) && isset($_COOKIE['password']) && isset($_COOKIE
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST["user_name"];
-    $password = $_POST["user_password"];
+    $password = md5($_POST["user_password"]);
 
     // Kiểm tra xem các trường có rỗng không
     if (empty($username) || empty($password)) {

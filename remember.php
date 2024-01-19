@@ -35,24 +35,48 @@ global $conn;
             </div>
             <?php
             $loi = "";
-            $pass = "";
+            $thongbao = "";
+
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $tendangnhap = $_POST["tendangnhap"];
                 $email = $_POST["email"];
 
-                if (empty($tendangnhap) && empty($email)) {
-                    $loi = "Moi bn nhap day du thong tin";
-                } else if (empty($tendangnhap)) {
-                    $loi = "Moi bn nhap ten dang nhap";
-                } else if (empty($email)) {
-                    $loi = "Moi bn nhap email";
+                if (empty($tendangnhap) || empty($email)) {
+                    $loi = "Vui lòng nhập đầy đủ thông tin.";
                 } else {
-                    $sql = mysqli_query($conn, "SELECT * FROM users where username = '$tendangnhap' and email = '$email'");
+                    // Kiểm tra sự tồn tại của tên đăng nhập và email trong cơ sở dữ liệu
+                    $sql = mysqli_query($conn, "SELECT * FROM users WHERE username = '$tendangnhap' AND email = '$email'");
                     $row = mysqli_fetch_assoc($sql);
+
                     if ($row) {
-                        $pass = "Mật khẩu của bạn là : " . $row['password'];
+                        // Tạo mật khẩu mới
+                        $newPassword = generateRandomPassword(); // Hàm này sẽ tạo một mật khẩu ngẫu nhiên, bạn có thể thay đổi cách tạo.
+            
+                        // Mã hóa mật khẩu mới và cập nhật vào cơ sở dữ liệu
+                        $hashedPassword = md5($newPassword);
+                        $updatePasswordSql = "UPDATE users SET password = '$hashedPassword' WHERE username = " . $row['username'];
+
+                        if (mysqli_query($conn, $updatePasswordSql)) {
+                            // Hiển thị mật khẩu mới cho người dùng
+                            $thongbao = "Mật khẩu mới của bạn là: " . $newPassword;
+                        } else {
+                            $loi = "Có lỗi xảy ra khi cập nhật mật khẩu mới.";
+                        }
+                    } else {
+                        $loi = "Tên đăng nhập hoặc email không đúng.";
                     }
                 }
+            }
+
+            // Hàm tạo mật khẩu ngẫu nhiên
+            function generateRandomPassword($length = 10)
+            {
+                $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                $password = '';
+                for ($i = 0; $i < $length; $i++) {
+                    $password .= $characters[rand(0, strlen($characters) - 1)];
+                }
+                return $password;
             }
             ?>
 
@@ -75,7 +99,7 @@ global $conn;
                     <span>
                         <?php
                         echo $loi;
-                        echo $pass;
+                        echo $thongbao;
                         ?>
                     </span>
                 </div>

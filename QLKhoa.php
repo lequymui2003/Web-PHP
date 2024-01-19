@@ -50,31 +50,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 }
 
 
-
+$error = "";
+$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idKhoa = $_POST["input1"];
     $nameKhoa = $_POST["input2"];
 
+    // Kiểm tra xem Tên Khoa đã tồn tại chưa (loại trừ khoa đang sửa)
+    $checkDuplicateSql = "SELECT * FROM khoa WHERE tenKhoa = '$nameKhoa' AND idKhoa != '$idKhoa'";
+    $result = $conn->query($checkDuplicateSql);
 
-    $updatePHSql = "UPDATE khoa SET tenKhoa = '$nameKhoa'
-    WHERE idKhoa = '$idKhoa'";
-    if ($conn->query($updatePHSql) === TRUE) {
+    if ($result->num_rows > 0) {
+        // Tên Khoa đã tồn tại (trừ khoa đang sửa), thông báo lỗi
+        $error = "Tên Khoa đã tồn tại.";
     } else {
+        // Thực hiện cập nhật khi không có trùng lặp
+        $updatePHSql = "UPDATE khoa SET tenKhoa = '$nameKhoa' WHERE idKhoa = '$idKhoa'";
+
+        if ($conn->query($updatePHSql) === TRUE) {
+            // Cập nhật thành công
+            $succes = "Cập nhật thành công.";
+        } else {
+            // Lỗi khi cập nhật
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idKhoa = $_POST["input1"];
     $nameKhoa = $_POST["input2"];
 
+    // Kiểm tra xem ID hoặc Tên Khoa đã tồn tại chưa
+    $checkDuplicateSql = "SELECT * FROM khoa WHERE idKhoa = '$idKhoa' OR tenKhoa = '$nameKhoa'";
+    $result = $conn->query($checkDuplicateSql);
 
-    $insertPHSql = "INSERT INTO khoa (idKhoa, tenKhoa) 
-                      VALUES ('$idKhoa', '$nameKhoa')";
-    if ($conn->query($insertPHSql) === TRUE) {
+    if ($result->num_rows > 0) {
+        // ID hoặc Tên Khoa đã tồn tại, thông báo lỗi
+        $error = "ID hoặc Tên Khoa đã tồn tại.";
     } else {
+        // Thực hiện thêm mới khi không có trùng lặp
+        $insertPHSql = "INSERT INTO khoa (idKhoa, tenKhoa) VALUES ('$idKhoa', '$nameKhoa')";
+
+        if ($conn->query($insertPHSql) === TRUE) {
+            // Thêm mới thành công
+            $succes = "Thêm mới thành công.";
+        } else {
+            // Lỗi khi thêm mới
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $idkhoa = $_POST["idKhoa"];
@@ -182,6 +211,14 @@ require_once 'header.php';
                                         <label for="">Tên Khoa: </label>
                                         <input type="text" placeholder="Nhập tên khoa"
                                             style="padding: 2px 3px; text-align:left;" class="rounded" name="input2">
+                                    </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

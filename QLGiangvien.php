@@ -31,7 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
-        $searchPHSql = "SELECT * FROM giangvien WHERE tenGV LIKE '%$name%'";
+        $searchPHSql = "SELECT giangvien.idGiangVien, giangvien.sdt, 
+        giangvien.tenGV, giangvien.idKhoa, khoa.tenKhoa, khoa.idKhoa FROM giangvien 
+        join khoa on giangvien.idKhoa = khoa.idKhoa WHERE tenGV LIKE '%$name%'";
         $result = $conn->query($searchPHSql);
         if ($result) {
             if (mysqli_num_rows($result) > 0) {
@@ -50,7 +52,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 }
 
 
-
+$error = "";
+$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idGV = $_POST["input1"];
@@ -58,12 +61,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $name = $_POST["input2"];
     $idKhoa = $_POST["input4"];
 
-    $updatePHSql = "UPDATE giangvien SET sdt = '$SDT', tenGV = '$name', idKhoa = '$idKhoa'
-    WHERE idGiangVien = '$idGV'";
-    if ($conn->query($updatePHSql) === TRUE) {
+    // Kiểm tra xem ID Giảng viên đã tồn tại chưa (loại trừ giảng viên đang sửa)
+    $checkDuplicateSql = "SELECT * FROM giangvien WHERE idGiangVien = '$idGV'";
+    $result = $conn->query($checkDuplicateSql);
+
+    // Kiểm tra định dạng số điện thoại
+    $phonePattern = '/^(09|03)\d{8}$/'; // Mẫu số điện thoại: 10 chữ số
+    $isValidPhone = preg_match($phonePattern, $SDT);
+
+    if ($result->num_rows > 0) {
+        // ID Giảng viên đã tồn tại (trừ giảng viên đang sửa), thông báo lỗi
+        $error = "ID Giảng viên đã tồn tại.";
+    } elseif (!$isValidPhone) {
+        // Số điện thoại không hợp lệ, thông báo lỗi
+        $error = "Số điện thoại không đúng định dạng.";
     } else {
+        // Thực hiện cập nhật khi không có trùng lặp và số điện thoại hợp lệ
+        $updatePHSql = "UPDATE giangvien SET sdt = '$SDT', tenGV = '$name', idKhoa = '$idKhoa'
+                        WHERE idGiangVien = '$idGV'";
+
+        if ($conn->query($updatePHSql) === TRUE) {
+            // Cập nhật thành công
+            $succes = "Cập nhật thành công.";
+        } else {
+            // Lỗi khi cập nhật
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý thêm
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idGV = $_POST["input1"];
@@ -71,12 +97,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $name = $_POST["input2"];
     $idKhoa = $_POST["input4"];
 
-    $insertPHSql = "INSERT INTO giangvien (idGiangVien, sdt, tenGV, idKhoa) 
-                      VALUES ('$idGV', '$SDT', '$name', '$idKhoa')";
-    if ($conn->query($insertPHSql) === TRUE) {
+    // Kiểm tra xem ID Giảng viên đã tồn tại chưa
+    $checkDuplicateSql = "SELECT * FROM giangvien WHERE idGiangVien = '$idGV'";
+    $result = $conn->query($checkDuplicateSql);
+
+    // Kiểm tra định dạng số điện thoại
+    $phonePattern = '/^(09|03)\d{8}$/'; // Mẫu số điện thoại: 10 chữ số
+    $isValidPhone = preg_match($phonePattern, $SDT);
+
+    if ($result->num_rows > 0) {
+        // ID Giảng viên đã tồn tại, thông báo lỗi
+        $error = "ID Giảng viên đã tồn tại.";
+    } elseif (!$isValidPhone) {
+        // Số điện thoại không hợp lệ, thông báo lỗi
+        $error = "Số điện thoại không đúng định dạng.";
     } else {
+        // Thực hiện thêm mới khi không có trùng lặp và số điện thoại hợp lệ
+        $insertPHSql = "INSERT INTO giangvien (idGiangVien, sdt, tenGV, idKhoa) VALUES ('$idGV', '$SDT', '$name', '$idKhoa')";
+
+        if ($conn->query($insertPHSql) === TRUE) {
+            // Thêm mới thành công
+            $succes = "Thêm mới thành công.";
+        } else {
+            // Lỗi khi thêm mới
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $idGV = $_POST["IDGiangVien"];
@@ -230,6 +278,14 @@ require_once 'header.php';
 
                                         }
                                         ?>
+                                    </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

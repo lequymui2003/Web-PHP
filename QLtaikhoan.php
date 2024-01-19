@@ -50,34 +50,88 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 }
 
 
-
+$error = "";
+$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $username = $_POST["input1"];
-    $password = $_POST["input2"];
-    $email = $_POST["input3"];
-    $phanquyen = $_POST["input4"];
+    $password = md5($_POST["input2"]);
+    $name = $_POST["input3"];
+    $email = $_POST["input4"];
+    $phanquyen = $_POST["input5"];
 
-    $updatePHSql = "UPDATE users SET email = '$email',  role = '$phanquyen'
-    WHERE username = '$username'";
-    if ($conn->query($updatePHSql) === TRUE) {
+    // Kiểm tra xem Username đã tồn tại chưa (loại trừ user đang sửa)
+    $checkDuplicateSql = "SELECT * FROM users WHERE username = '$username' AND username != '$username'";
+    $result = $conn->query($checkDuplicateSql);
+
+    // Kiểm tra xem Email đã tồn tại chưa (loại trừ user đang sửa)
+    $checkEmailSql = "SELECT * FROM users WHERE email = '$email' AND username != '$username'";
+    $resultEmail = $conn->query($checkEmailSql);
+
+    // Kiểm tra định dạng Email
+    $isValidEmail = preg_match('/^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,}@gmail\.com$/', $email);
+
+    if ($result->num_rows > 0) {
+        // Username đã tồn tại (loại trừ user đang sửa), thông báo lỗi
+        $error = "Username đã tồn tại.";
+    } elseif ($resultEmail->num_rows > 0) {
+        // Email đã tồn tại (loại trừ user đang sửa), thông báo lỗi
+        $error = "Email đã tồn tại.";
+    } elseif (!$isValidEmail) {
+        // Email không hợp lệ, thông báo lỗi
+        $error = "Email không đúng định dạng.";
     } else {
+        // Thực hiện cập nhật khi không có trùng lặp và Email hợp lệ
+        $updatePHSql = "UPDATE users SET email = '$email', Name = '$name', role = '$phanquyen'
+                        WHERE username = '$username'";
+
+        if ($conn->query($updatePHSql) === TRUE) {
+            // Cập nhật thành công
+            $succes = "Cập nhật thành công.";
+        } else {
+            // Lỗi khi cập nhật
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $username = $_POST["input1"];
-    $password = $_POST["input2"];
-    $email = $_POST["input3"];
-    $role = $_POST["input4"];
+    $password = md5($_POST["input2"]);
+    $name = $_POST["input3"];
+    $email = $_POST["input4"];
+    $phanquyen = $_POST["input5"];
+
+    // Kiểm tra xem Username hoặc Email đã tồn tại chưa
+    $checkDuplicateSql = "SELECT * FROM users WHERE username = '$username' OR email = '$email'";
+    $result = $conn->query($checkDuplicateSql);
 
 
-    $insertPHSql = "INSERT INTO users (username, password, email, role) 
-                      VALUES ('$username', '$password', '$email', '$role')";
-    if ($conn->query($insertPHSql) === TRUE) {
+    // Kiểm tra định dạng Email
+    $isValidEmail = preg_match('/^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,}@gmail\.com$/', $email);
+
+    if ($result->num_rows > 0) {
+        // Username hoặc Email đã tồn tại, thông báo lỗi
+        $error = "Username hoặc Email đã tồn tại.";
+    } elseif (!$isValidEmail) {
+        // Email không hợp lệ, thông báo lỗi
+        $error = "Email không đúng định dạng.";
     } else {
+        // Thực hiện thêm mới khi không có trùng lặp và Email hợp lệ
+        $insertPHSql = "INSERT INTO users (username, password, Name, email, role) 
+                        VALUES ('$username', '$password', '$name', '$email', '$phanquyen')";
+
+        if ($conn->query($insertPHSql) === TRUE) {
+            // Thêm mới thành công
+            $succes = "Thêm mới thành công.";
+        } else {
+            // Lỗi khi thêm mới
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $username = $_POST["username"];
@@ -98,14 +152,15 @@ require_once 'header.php';
     <section class="container-fluid">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-8 content-pane d-flex">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-8 table-responsive mt-3 ms-3 mb-3">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-11 content-pane d-flex">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-9 table-responsive mt-3 ms-3 mb-3">
                         <table id="table"
                             class="col-xs-12 col-sm-12 col-md-12 col-lg-8 w-100 border-collapse text-center table">
                             <thead>
                                 <tr class="table-dark text-white">
                                     <th>Username</th>
                                     <th>Password</th>
+                                    <th>Họ và tên</th>
                                     <th>Email</th>
                                     <th>Phân quyền</th>
                                     <th>Chức năng</th>
@@ -124,6 +179,9 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["password"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["Name"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["email"] ?>
@@ -157,6 +215,9 @@ require_once 'header.php';
                                                 <?php echo $row["password"] ?>
                                             </td>
                                             <td>
+                                                <?php echo $row["Name"] ?>
+                                            </td>
+                                            <td>
                                                 <?php echo $row["email"] ?>
                                             </td>
                                             <td>
@@ -177,7 +238,7 @@ require_once 'header.php';
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-xs-4 col-sm-12 col-md-12 col-lg-4 mt-3">
+                    <div class="col-xs-4 col-sm-12 col-md-12 col-lg-3 mt-3">
                         <div class="row">
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-12">
                                 <form method="post" action="" class="d-flex justify-content-around form-search">
@@ -192,27 +253,38 @@ require_once 'header.php';
                                 <form action="" method="post">
                                     <div class="d-flex flex-column ms-2">
                                         <label for="">Username : </label>
-                                        <input float="left" type="text" placeholder="Nhập ID phòng"
+                                        <input float="left" type="text" placeholder="Nhập mã nhân viên"
                                             style="padding: 2px 3px;" class="rounded" name="input1">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">Password: </label>
-                                        <input type="password" placeholder="Nhập tên phòng"
+                                        <input type="password" placeholder="Nhập mật khẩu"
                                             style="padding: 2px 3px; text-align:left;" class="rounded" name="input2">
+                                    </div>
+                                    <div class="d-flex flex-column ms-2 mt-2">
+                                        <label for="">Họ và tên: </label>
+                                        <input type="text" placeholder="Nhập tên"
+                                            style="padding: 2px 3px; text-align:left;" class="rounded" name="input3">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">Email: </label>
                                         <input type="text" placeholder="Nhập ID khoa" style="padding: 2px 3px"
-                                            class="rounded" name="input3">
+                                            class="rounded" name="input4">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">Phân quyền: </label>
-                                        <!-- <input type="text" placeholder="Nhập tình trạng" style="padding: 2px 3px"
-                                            class="rounded" name="input4"> -->
-                                        <select name="input4" style="padding: 2px 3px" class="rounded">
-                                            <option value="Admin">admin</option>
+                                        <select name="input5" style="padding: 2px 3px" class="rounded">
+                                            <option value="admin">admin</option>
                                             <option value="user">user</option>
                                         </select>
+                                    </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

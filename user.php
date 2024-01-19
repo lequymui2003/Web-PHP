@@ -9,10 +9,7 @@ if (!$_SESSION["login"]) {
 // var_dump($_SESSION['name']);
 if (isset($_COOKIE['name']) || isset($_SESSION['name'])) {
     $username = $_COOKIE['name'] = $_SESSION['name'];
-    $sql = "SELECT users.username, users.role, nguoidung.Name 
-        FROM users 
-        LEFT JOIN nguoidung ON users.username = nguoidung.ID 
-        WHERE users.username = '$username'";
+    $sql = "SELECT * FROM users WHERE users.username = '$username'";
 
     $result = mysqli_query($conn, $sql);
 
@@ -127,12 +124,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["dangky"])) {
 }
 
 $sql = mysqli_query($conn, "SELECT xeplich.idPhong, phonghoc.tenPhong, 
-monhoc.tenMon, giangvien.tenGV, 
+monhoc.tenMon, giangvien.tenGV, lop.tenLop,
 xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
 FROM xeplich 
 join phonghoc on xeplich.idPhong = phonghoc.idPhong 
 join giangvien on xeplich.idGV = giangvien.idGiangVien
-join monhoc on xeplich.idMon = monhoc.idMon");
+join monhoc on xeplich.idMon = monhoc.idMon
+join lop on xeplich.idLop = lop.idLop");
 if (mysqli_num_rows($sql) === 0) {
 }
 ?>
@@ -236,6 +234,7 @@ if (mysqli_num_rows($sql) === 0) {
                                         <tr class="table-dark text-white">
                                             <th>ID Phòng</th>
                                             <th>Tên phòng</th>
+                                            <th>Tên lớp</th>
                                             <th>Môn</th>
                                             <th>GIảng viên</th>
                                             <th>Thời gian bắt đầu</th>
@@ -256,6 +255,9 @@ if (mysqli_num_rows($sql) === 0) {
                                                     </td>
                                                     <td>
                                                         <?php echo $searchResult["tenPhong"] ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $searchResult["tenLop"] ?>
                                                     </td>
                                                     <td>
                                                         <?php echo $searchResult["tenMon"] ?>
@@ -308,6 +310,9 @@ if (mysqli_num_rows($sql) === 0) {
                                                     </td>
                                                     <td>
                                                         <?php echo $row["tenPhong"] ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo $row["tenLop"] ?>
                                                     </td>
                                                     <td>
                                                         <?php echo $row["tenMon"] ?>

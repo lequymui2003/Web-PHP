@@ -31,9 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
-        $searchPHSql = "SELECT cosovatchat.ten, ctcosovatchat.id, 
-        ctcosovatchat.idPhong, ctcosovatchat.SoLuongTot, ctcosovatchat.SoLuongXau
-        FROM ctcosovatchat 
+        $searchPHSql = "SELECT cosovatchat.ten, ctcosovatchat.id,
+        ctcosovatchat.idPhong, ctcosovatchat.SoLuongTot, ctcosovatchat.SoLuongXau, ctcosovatchat.stt
+        FROM ctcosovatchat
         join cosovatchat on ctcosovatchat.id = cosovatchat.id WHERE idPhong = '$name'";
         $result = $conn->query($searchPHSql);
         if ($result) {
@@ -53,7 +53,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 }
 
 
-
+$error = "";
+$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $id = $_POST["input1"];
@@ -61,12 +62,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $SLX = $_POST["input4"];
     $idPhong = $_POST["input5"];
 
-    $updatePHSql = "UPDATE ctcosovatchat SET SoLuongTot = '$SLT', 
-    SoLuongXau = '$SLX' WHERE id = '$id' and idPhong ='$idPhong'";
-    if ($conn->query($updatePHSql) === TRUE) {
+    // Kiểm tra xem ID hoặc ID Phòng đã tồn tại chưa (loại trừ dòng đang sửa)
+    $checkDuplicateSql = "SELECT * FROM ctcosovatchat WHERE (id = '$id' OR idPhong = '$idPhong') AND NOT (id = '$id' AND idPhong = '$idPhong')";
+    $result = $conn->query($checkDuplicateSql);
+
+    if ($result->num_rows > 0) {
+        // ID hoặc ID Phòng đã tồn tại (loại trừ dòng đang sửa), thông báo lỗi
+        $error = "ID hoặc ID Phòng đã tồn tại.";
     } else {
+        // Thực hiện cập nhật khi không có trùng lặp
+        $updatePHSql = "UPDATE ctcosovatchat SET SoLuongTot = '$SLT', 
+                        SoLuongXau = '$SLX' WHERE id = '$id' AND idPhong = '$idPhong'";
+
+        if ($conn->query($updatePHSql) === TRUE) {
+            // Cập nhật thành công
+            $succes = "Cập nhật thành công.";
+        } else {
+            // Lỗi khi cập nhật
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $id = $_POST["input1"];
@@ -74,18 +91,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $SLX = $_POST["input4"];
     $idPhong = $_POST["input5"];
 
-    $insertPHSql = "INSERT INTO ctcosovatchat (id, SoLuongTot, SoLuongXau, idPhong) 
-                      VALUES ('$id', '$SLT', '$SLX', '$idPhong')";
-    if ($conn->query($insertPHSql) === TRUE) {
+    // Kiểm tra xem ID hoặc ID Phòng đã tồn tại chưa
+    $checkDuplicateSql = "SELECT * FROM ctcosovatchat WHERE id = '$id' and idPhong = '$idPhong'";
+    $result = $conn->query($checkDuplicateSql);
+
+    if ($result->num_rows > 0) {
+        // ID hoặc ID Phòng đã tồn tại, thông báo lỗi
+        $error = "ID hoặc ID Phòng đã tồn tại.";
     } else {
+        // Thực hiện thêm mới khi không có trùng lặp
+        $insertPHSql = "INSERT INTO ctcosovatchat (id, SoLuongTot, SoLuongXau, idPhong) 
+                        VALUES ('$id', '$SLT', '$SLX', '$idPhong')";
+
+        if ($conn->query($insertPHSql) === TRUE) {
+            // Thêm mới thành công
+            $succes = "Thêm mới thành công.";
+        } else {
+            // Lỗi khi thêm mới
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $id = $_POST["ID"];
-    $idPhong = $_POST["IdPhong"];
 
-    $deletePHSql = "DELETE FROM ctcosovatchat WHERE id= '$id' and idPhong ='$idPhong'";
+    $deletePHSql = "DELETE FROM ctcosovatchat WHERE stt= '$id'";
     if ($conn->query($deletePHSql) === TRUE) {
     } else {
     }
@@ -93,7 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
 ?>
 <?php
 $sql = mysqli_query($conn, "SELECT cosovatchat.ten, ctcosovatchat.id,
-ctcosovatchat.idPhong, ctcosovatchat.SoLuongTot, ctcosovatchat.SoLuongXau
+ctcosovatchat.idPhong, ctcosovatchat.SoLuongTot, ctcosovatchat.SoLuongXau, ctcosovatchat.stt
 FROM ctcosovatchat
 join cosovatchat on ctcosovatchat.id = cosovatchat.id");
 if (mysqli_num_rows($sql) === 0) {
@@ -145,9 +177,7 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
-                                                    <input type="hidden" name="ID" value="<?php echo $searchResult["id"] ?>">
-                                                    <input type="hidden" name="IdPhong"
-                                                        value="<?php echo $searchResult["idPhong"] ?>">
+                                                    <input type="hidden" name="ID" value="<?php echo $searchResult["stt"] ?>">
                                                     <input type="submit" name="delete" value="Xóa" class="input-style"></input>
                                                 </form>
                                             </td>
@@ -180,8 +210,7 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
-                                                    <input type="hidden" name="ID" value="<?php echo $row["id"] ?>">
-                                                    <input type="hidden" name="IdPhong" value="<?php echo $row["idPhong"] ?>">
+                                                    <input type="hidden" name="ID" value="<?php echo $row["stt"] ?>">
                                                     <input type="submit" name="delete" value="Xóa" class="input-style"></input>
                                                 </form>
                                             </td>
@@ -231,7 +260,7 @@ require_once 'header.php';
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">Số lượng tốt: </label>
-                                        <input type="text" placeholder="Nhập tên" style="padding: 2px 3px"
+                                        <input type="text" placeholder="Nhập số lượng" style="padding: 2px 3px"
                                             class="rounded" name="input3">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
@@ -255,6 +284,14 @@ require_once 'header.php';
 
                                         }
                                         ?>
+                                    </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

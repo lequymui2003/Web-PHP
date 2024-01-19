@@ -50,30 +50,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 }
 
 
-
+$error = "";
+$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idLop = $_POST["input1"];
     $nameLop = $_POST["input2"];
     $idKhoa = $_POST["input3"];
 
-    $updatePHSql = "UPDATE lop SET tenLop = '$nameLop', idKhoa='$idKhoa'
-    WHERE idLop = '$idLop'";
-    if ($conn->query($updatePHSql) === TRUE) {
+    // Kiểm tra xem ID Lớp đã tồn tại chưa (loại trừ lớp đang sửa)
+    $checkDuplicateSql = "SELECT * FROM lop WHERE idLop = '$idLop'";
+    $result = $conn->query($checkDuplicateSql);
+
+    if ($result->num_rows > 0) {
+        // ID Lớp đã tồn tại (trừ lớp đang sửa), thông báo lỗi
+        $error = "ID Lớp đã tồn tại.";
     } else {
+        // Thực hiện cập nhật khi không có trùng lặp
+        $updatePHSql = "UPDATE lop SET tenLop = '$nameLop', idKhoa='$idKhoa'
+                        WHERE idLop = '$idLop'";
+
+        if ($conn->query($updatePHSql) === TRUE) {
+            // Cập nhật thành công
+            $succes = "Cập nhật thành công.";
+        } else {
+            // Lỗi khi cập nhật
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idLop = $_POST["input1"];
     $nameLop = $_POST["input2"];
     $idKhoa = $_POST["input3"];
 
-    $insertPHSql = "INSERT INTO lop (idLop, tenLop, idKhoa)  VALUES ('$idLop', '$nameLop', '$idKhoa')";
-    if ($conn->query($insertPHSql) === TRUE) {
+    // Kiểm tra xem ID Lớp hoặc Tên Lớp đã tồn tại chưa
+    $checkDuplicateSql = "SELECT * FROM lop WHERE idLop = '$idLop' OR tenLop = '$nameLop'";
+    $result = $conn->query($checkDuplicateSql);
+
+    if ($result->num_rows > 0) {
+        // ID Lớp hoặc Tên Lớp đã tồn tại, thông báo lỗi
+        $error = "ID Lớp hoặc Tên Lớp đã tồn tại.";
     } else {
+        // Thực hiện thêm mới khi không có trùng lặp
+        $insertPHSql = "INSERT INTO lop (idLop, tenLop, idKhoa) VALUES ('$idLop', '$nameLop', '$idKhoa')";
+
+        if ($conn->query($insertPHSql) === TRUE) {
+            // Thêm mới thành công
+            $succes = "Thêm mới thành công.";
+        } else {
+            // Lỗi khi thêm mới
+            $error = "Lỗi: " . $conn->error;
+        }
     }
 }
+
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $idLop = $_POST["idLop"];
@@ -215,6 +248,14 @@ require_once 'header.php';
 
                                         }
                                         ?>
+                                    </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>

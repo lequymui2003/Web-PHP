@@ -50,7 +50,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 }
 
 
-
+$error = "";
+$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     // Dữ liệu từ form
@@ -59,19 +60,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $soTinChi = $_POST["input3"];
     $idKhoa = $_POST["input4"];
 
-    // Câu lệnh UPDATE
-    $updateMonHocSql = "UPDATE monhoc 
-                    SET tenMon = '$tenMon', soTinChi = '$soTinChi', idKhoa = '$idKhoa'
-                    WHERE idMon = '$idMon'";
+    // Kiểm tra số tín chỉ nhỏ hơn 5
+    if ($soTinChi <= 5) {
+        // Câu lệnh UPDATE
+        $updateMonHocSql = "UPDATE monhoc 
+                        SET tenMon = '$tenMon', soTinChi = '$soTinChi', idKhoa = '$idKhoa'
+                        WHERE idMon = '$idMon'";
 
-    // Thực thi câu lệnh
-    if ($conn->query($updateMonHocSql) === TRUE) {
-        // Xử lý khi cập nhật dữ liệu thành công
+        // Thực thi câu lệnh
+        if ($conn->query($updateMonHocSql) === TRUE) {
+            // Xử lý khi cập nhật dữ liệu thành công
+            $succes = "Cập nhật thành công.";
+        } else {
+            // Xử lý khi có lỗi xảy ra trong quá trình cập nhật dữ liệu
+            $error = "Lỗi: " . $conn->error;
+        }
     } else {
-        // Xử lý khi có lỗi xảy ra trong quá trình cập nhật dữ liệu
+        // Số tín chỉ lớn hơn 5, thông báo lỗi
+        $error = "Số tín chỉ phải nhỏ hơn hoặc bằng 5.";
     }
-
 }
+
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idMon = $_POST["input1"];
@@ -79,12 +88,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $soTinChi = $_POST["input3"];
     $idKhoa = $_POST["input4"];
 
-    $insertPHSql = "INSERT INTO monhoc (idMon, tenMon, soTinChi, idKhoa) 
-                      VALUES ('$idMon', '$tenMon', '$soTinChi','$idKhoa')";
-    if ($conn->query($insertPHSql) === TRUE) {
+    // Kiểm tra xem ID hoặc Tên Môn đã tồn tại chưa
+    $checkDuplicateSql = "SELECT * FROM monhoc WHERE idMon = '$idMon' OR tenMon = '$tenMon'";
+    $result = $conn->query($checkDuplicateSql);
+
+    // Kiểm tra số tín chỉ nhỏ hơn 5
+    if ($soTinChi <= 5) {
+        if ($result->num_rows > 0) {
+            // ID hoặc Tên Môn đã tồn tại, thông báo lỗi
+            $error = "ID hoặc Tên Môn đã tồn tại.";
+        } else {
+            // Thực hiện thêm mới khi không có trùng lặp và số tín chỉ hợp lệ
+            $insertPHSql = "INSERT INTO monhoc (idMon, tenMon, soTinChi, idKhoa) VALUES ('$idMon', '$tenMon', '$soTinChi', '$idKhoa')";
+
+            if ($conn->query($insertPHSql) === TRUE) {
+                // Thêm mới thành công
+                $succes = "Thêm mới thành công.";
+            } else {
+                // Lỗi khi thêm mới
+                $error = "Lỗi: " . $conn->error;
+            }
+        }
     } else {
+        // Số tín chỉ lớn hơn 5, thông báo lỗi
+        $error = "Số tín chỉ phải nhỏ hơn hoặc bằng 5.";
     }
 }
+
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $idMon = $_POST["IDMon"];
@@ -228,6 +258,14 @@ require_once 'header.php';
 
                                         }
                                         ?>
+                                    </div>
+                                    <div class="ms-2 mt-2">
+                                        <label for="" class="text-red">
+                                            <?php
+                                            echo $error;
+                                            echo $succes;
+                                            ?>
+                                        </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
                                         <div>
