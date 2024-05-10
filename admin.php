@@ -1,15 +1,15 @@
 <?php
 include "./database/Class-Database.php";
 global $conn;
-if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
-    header("Location: login.php");
-    exit();
-}
+// if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
+//     header("Location: login.php");
+//     exit();
+// }
 
-if ($_SESSION["login"] !== "admin") {
-    header("Location: user.php");
-    exit();
-}
+// if ($_SESSION["login"] !== "admin") {
+//     header("Location: user.php");
+//     exit();
+// }
 if (isset($_GET['logout'])) {
     // Xóa cookie
     setcookie('username', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
@@ -26,80 +26,104 @@ if (isset($_GET['logout'])) {
 ?>
 <?php
 // Xử lý tìm kiếm
+$error = "";
+$succes = "";
 $name = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT * FROM phonghoc WHERE tenPhong = '$name'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
-            if (mysqli_num_rows($result) > 0) {
-                // Lưu kết quả tìm kiếm vào một mảng
-                $searchResults = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $searchResults[] = $row;
-                }
-            } else {
-                echo "Không tìm thấy kết quả.";
-            }
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
         } else {
-            echo "Lỗi: " . $conn->error;
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    // Lưu kết quả tìm kiếm vào một mảng
+                    $searchResults = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $searchResults[] = $row;
+                    }
+                } else {
+                    echo "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
 }
 
-$error = "";
-$succes = "";
 // xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    // $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     // Kiểm tra xem Tên Phòng đã tồn tại chưa (loại trừ phòng đang sửa)
     $checkDuplicateSql = "SELECT * FROM phonghoc WHERE tenPhong = '$namePH' AND idPhong != '$idPH'";
     $result = $conn->query($checkDuplicateSql);
+    if ($idPH == "" || $namePH == "") {
+        $error = "Mời chọn phòng học cần sửa";
+    // } else {
+    //     // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+    //     if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
+    //         $error = "Không nhập kí tự đặc biệt.";
+         } else {
+            if ($result->num_rows > 0) {
+                // Tên Phòng đã tồn tại (trừ phòng đang sửa), thông báo lỗi
+                $error = "Tên Phòng đã tồn tại.";
+            } else {
+                // Thực hiện cập nhật khi không có trùng lặp
+                $updatePHSql = "UPDATE phonghoc SET tenPhong = '$namePH' WHERE idPhong = '$idPH'";
 
-    if ($result->num_rows > 0) {
-        // Tên Phòng đã tồn tại (trừ phòng đang sửa), thông báo lỗi
-        $error = "Tên Phòng đã tồn tại.";
-    } else {
-        // Thực hiện cập nhật khi không có trùng lặp
-        $updatePHSql = "UPDATE phonghoc SET tenPhong = '$namePH' WHERE idPhong = '$idPH'";
-
-        if ($conn->query($updatePHSql) === TRUE) {
-            // Cập nhật thành công
-            $succes = "Cập nhật thành công.";
-        } else {
-            // Lỗi khi cập nhật
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($updatePHSql) === TRUE) {
+                    // Cập nhật thành công
+                    $succes = "Cập nhật thành công.";
+                } else {
+                    // Lỗi khi cập nhật
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
-}
+
 
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
-
-    // Kiểm tra xem ID hoặc Tên Phòng đã tồn tại chưa
+    //Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()]/";
+    //Kiểm tra xem ID hoặc Tên Phòng đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM phonghoc WHERE idPhong = '$idPH' or tenPhong = '$namePH'";
     $result = $conn->query($checkDuplicateSql);
 
-    if ($result->num_rows > 0) {
-        // ID hoặc Tên Phòng đã tồn tại, thông báo lỗi
-        $error = "ID hoặc Tên Phòng đã tồn tại.";
+    if ($idPH == "" || $namePH == "") {
+        $error = "Mời nhập đầy đủ thông tin";
     } else {
-        // Thực hiện thêm mới khi không có trùng lặp
-        $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong) VALUES ('$idPH', '$namePH')";
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
+            $error = "Không nhập kí tự đặc biệt.";
+         } else {
+            if ($result->num_rows > 0) {
+                // ID hoặc Tên Phòng đã tồn tại, thông báo lỗi
+                $error = "ID hoặc Tên Phòng đã tồn tại.";
+            } else {
+                // Thực hiện thêm mới khi không có trùng lặp
+                $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong) VALUES ('$idPH', '$namePH')";
 
-        if ($conn->query($insertPHSql) === TRUE) {
-            // Thêm mới thành công
-            $succes = "Thêm mới thành công.";
-        } else {
-            // Lỗi khi thêm mới
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($insertPHSql) === TRUE) {
+                    // Thêm mới thành công
+                    $succes = "Thêm mới thành công.";
+                } else {
+                    // Lỗi khi thêm mới
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
+
     }
 }
 
@@ -213,11 +237,17 @@ require_once 'header.php';
                                             style="padding: 2px 3px; text-align:left;" class="rounded" name="input2">
                                     </div>
                                     <div class="ms-2 mt-2">
-                                        <label for="" class="text-red">
-                                            <?php
-                                            echo $error;
-                                            echo $succes;
+                                        <label for="" class="">
+                                            <label for="" class="text-red">
+                                            <?php 
+                                               echo $error
                                             ?>
+                                            </label>
+                                            <label for="" class="text-green">
+                                            <?php 
+                                               echo $succes
+                                            ?>
+                                            </label>
                                         </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">

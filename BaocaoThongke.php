@@ -25,6 +25,7 @@ if (isset($_GET['logout'])) {
 }
 ?>
 <?php
+$error = "";
 $name = "";
 if (isset($_POST['search'])) {
     $searchPHSql = "SELECT phonghoc.idPhong, phonghoc.tenPhong,
@@ -60,6 +61,8 @@ if (isset($_POST['search'])) {
     }
 } elseif (isset($_POST['search3'])) {
     $name = $_POST["search-name"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT cosovatchat.ten, ctcosovatchat.SoLuongTot,
@@ -67,15 +70,20 @@ if (isset($_POST['search'])) {
         join cosovatchat on ctcosovatchat.id =  cosovatchat.id
         WHERE idPhong = '$name'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
-            if (mysqli_num_rows($result) > 0) {
-                // Lưu kết quả tìm kiếm vào một mảng
-                $searchResults2 = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $searchResults2[] = $row;
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    // Lưu kết quả tìm kiếm vào một mảng
+                    $searchResults2 = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $searchResults2[] = $row;
+                    }
                 }
             }
         }
+
     }
 }
 
@@ -276,6 +284,13 @@ require_once 'header.php';
                                             <input type="submit" name="search3" value="Tìm kiếm"
                                                 class="input-style me-4">
                                         </form>
+                                        <div class="ms-2 mt-2">
+                                                <label for="" class="text-red">
+                                                    <?php
+                                                    echo $error;
+                                                    ?>
+                                                </label>
+                                            </div>
                                     </div>
                                 </div>
                             </div>

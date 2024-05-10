@@ -129,7 +129,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
 
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                            <a href="remember.php" id="forgotPassword" class="float-start float-sm-end size-text">Quên
+                            <a href="forgetPassword.php" id="forgotPassword" class="float-start float-sm-end size-text">Quên
                                 mật khẩu ?</a>
                         </div>
                     </div>

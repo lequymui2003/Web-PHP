@@ -26,32 +26,36 @@ if (isset($_GET['logout'])) {
 ?>
 <?php
 // Xử lý tìm kiếm
+$error = "";
+$succes = "";
 $name = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT  * FROM monhoc WHERE tenMon = '$name'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
-            if (mysqli_num_rows($result) > 0) {
-                // Lưu kết quả tìm kiếm vào một mảng
-                $searchResults = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $searchResults[] = $row;
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    // Lưu kết quả tìm kiếm vào một mảng
+                    $searchResults = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $searchResults[] = $row;
+                    }
                 }
             } else {
-                // echo "Không tìm thấy kết quả.";
+                echo "Lỗi: " . $conn->error;
             }
-        } else {
-            echo "Lỗi: " . $conn->error;
         }
+
     }
 }
 
-
-$error = "";
-$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     // Dữ liệu từ form
@@ -59,27 +63,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $tenMon = $_POST["input2"];
     $soTinChi = $_POST["input3"];
     $idKhoa = $_POST["input4"];
-
-    // Kiểm tra số tín chỉ nhỏ hơn 5
-    if ($soTinChi <= 5) {
-        // Câu lệnh UPDATE
-        $updateMonHocSql = "UPDATE monhoc 
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (
+            preg_match($specialCharsPattern, $idMon) || preg_match($specialCharsPattern, $tenMon)
+            || preg_match($specialCharsPattern, $soTinChi) || preg_match($specialCharsPattern, $idKhoa)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            // Kiểm tra số tín chỉ nhỏ hơn 5
+            if ($soTinChi <= 5) {
+                // Câu lệnh UPDATE
+                $updateMonHocSql = "UPDATE monhoc 
                         SET tenMon = '$tenMon', soTinChi = '$soTinChi', idKhoa = '$idKhoa'
                         WHERE idMon = '$idMon'";
 
-        // Thực thi câu lệnh
-        if ($conn->query($updateMonHocSql) === TRUE) {
-            // Xử lý khi cập nhật dữ liệu thành công
-            $succes = "Cập nhật thành công.";
-        } else {
-            // Xử lý khi có lỗi xảy ra trong quá trình cập nhật dữ liệu
-            $error = "Lỗi: " . $conn->error;
+                // Thực thi câu lệnh
+                if ($conn->query($updateMonHocSql) === TRUE) {
+                    // Xử lý khi cập nhật dữ liệu thành công
+                    $succes = "Cập nhật thành công.";
+                } else {
+                    // Xử lý khi có lỗi xảy ra trong quá trình cập nhật dữ liệu
+                    $error = "Lỗi: " . $conn->error;
+                }
+            } else {
+                // Số tín chỉ lớn hơn 5, thông báo lỗi
+                $error = "Số tín chỉ phải nhỏ hơn hoặc bằng 5.";
+            }
         }
-    } else {
-        // Số tín chỉ lớn hơn 5, thông báo lỗi
-        $error = "Số tín chỉ phải nhỏ hơn hoặc bằng 5.";
     }
-}
 
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
@@ -87,33 +100,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $tenMon = $_POST["input2"];
     $soTinChi = $_POST["input3"];
     $idKhoa = $_POST["input4"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem ID hoặc Tên Môn đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM monhoc WHERE idMon = '$idMon' OR tenMon = '$tenMon'";
     $result = $conn->query($checkDuplicateSql);
-
-    // Kiểm tra số tín chỉ nhỏ hơn 5
-    if ($soTinChi <= 5) {
-        if ($result->num_rows > 0) {
-            // ID hoặc Tên Môn đã tồn tại, thông báo lỗi
-            $error = "ID hoặc Tên Môn đã tồn tại.";
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (
+            preg_match($specialCharsPattern, $idMon) || preg_match($specialCharsPattern, $tenMon)
+            || preg_match($specialCharsPattern, $soTinChi) || preg_match($specialCharsPattern, $idKhoa)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
         } else {
-            // Thực hiện thêm mới khi không có trùng lặp và số tín chỉ hợp lệ
-            $insertPHSql = "INSERT INTO monhoc (idMon, tenMon, soTinChi, idKhoa) VALUES ('$idMon', '$tenMon', '$soTinChi', '$idKhoa')";
+            // Kiểm tra số tín chỉ nhỏ hơn 5
+            if ($soTinChi <= 5) {
+                if ($result->num_rows > 0) {
+                    // ID hoặc Tên Môn đã tồn tại, thông báo lỗi
+                    $error = "ID hoặc Tên Môn đã tồn tại.";
+                } else {
+                    // Thực hiện thêm mới khi không có trùng lặp và số tín chỉ hợp lệ
+                    $insertPHSql = "INSERT INTO monhoc (idMon, tenMon, soTinChi, idKhoa) VALUES ('$idMon', '$tenMon', '$soTinChi', '$idKhoa')";
 
-            if ($conn->query($insertPHSql) === TRUE) {
-                // Thêm mới thành công
-                $succes = "Thêm mới thành công.";
+                    if ($conn->query($insertPHSql) === TRUE) {
+                        // Thêm mới thành công
+                        $succes = "Thêm mới thành công.";
+                    } else {
+                        // Lỗi khi thêm mới
+                        $error = "Lỗi: " . $conn->error;
+                    }
+                }
             } else {
-                // Lỗi khi thêm mới
-                $error = "Lỗi: " . $conn->error;
+                // Số tín chỉ lớn hơn 5, thông báo lỗi
+                $error = "Số tín chỉ phải nhỏ hơn hoặc bằng 5.";
             }
         }
-    } else {
-        // Số tín chỉ lớn hơn 5, thông báo lỗi
-        $error = "Số tín chỉ phải nhỏ hơn hoặc bằng 5.";
     }
-}
 
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {

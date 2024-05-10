@@ -26,83 +26,109 @@ if (isset($_GET['logout'])) {
 ?>
 <?php
 // Xử lý tìm kiếm
+$error = "";
+$succes = "";
 $name = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT * FROM lop WHERE tenLop = '$name'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
-            if (mysqli_num_rows($result) > 0) {
-                // Lưu kết quả tìm kiếm vào một mảng
-                $searchResults = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $searchResults[] = $row;
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    // Lưu kết quả tìm kiếm vào một mảng
+                    $searchResults = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $searchResults[] = $row;
+                    }
+                } else {
+                    // echo "Không tìm thấy kết quả.";
                 }
             } else {
-                // echo "Không tìm thấy kết quả.";
+                echo "Lỗi: " . $conn->error;
             }
-        } else {
-            echo "Lỗi: " . $conn->error;
         }
+
     }
 }
 
-
-$error = "";
-$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idLop = $_POST["input1"];
     $nameLop = $_POST["input2"];
     $idKhoa = $_POST["input3"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem ID Lớp đã tồn tại chưa (loại trừ lớp đang sửa)
     $checkDuplicateSql = "SELECT * FROM lop WHERE idLop = '$idLop'";
     $result = $conn->query($checkDuplicateSql);
-
-    if ($result->num_rows > 0) {
-        // ID Lớp đã tồn tại (trừ lớp đang sửa), thông báo lỗi
-        $error = "ID Lớp đã tồn tại.";
-    } else {
-        // Thực hiện cập nhật khi không có trùng lặp
-        $updatePHSql = "UPDATE lop SET tenLop = '$nameLop', idKhoa='$idKhoa'
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (
+            preg_match($specialCharsPattern, $idLop) || preg_match($specialCharsPattern, $nameLop)
+            || preg_match($specialCharsPattern, $idKhoa)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result->num_rows > 0) {
+                // ID Lớp đã tồn tại (trừ lớp đang sửa), thông báo lỗi
+                $error = "ID Lớp đã tồn tại.";
+            } else {
+                // Thực hiện cập nhật khi không có trùng lặp
+                $updatePHSql = "UPDATE lop SET tenLop = '$nameLop', idKhoa='$idKhoa'
                         WHERE idLop = '$idLop'";
 
-        if ($conn->query($updatePHSql) === TRUE) {
-            // Cập nhật thành công
-            $succes = "Cập nhật thành công.";
-        } else {
-            // Lỗi khi cập nhật
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($updatePHSql) === TRUE) {
+                    // Cập nhật thành công
+                    $succes = "Cập nhật thành công.";
+                } else {
+                    // Lỗi khi cập nhật
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
-}
 
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idLop = $_POST["input1"];
     $nameLop = $_POST["input2"];
     $idKhoa = $_POST["input3"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem ID Lớp hoặc Tên Lớp đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM lop WHERE idLop = '$idLop' OR tenLop = '$nameLop'";
     $result = $conn->query($checkDuplicateSql);
-
-    if ($result->num_rows > 0) {
-        // ID Lớp hoặc Tên Lớp đã tồn tại, thông báo lỗi
-        $error = "ID Lớp hoặc Tên Lớp đã tồn tại.";
+    if ($idLop == "" || $nameLop == "" || $idKhoa == "") {
+        $error = "Mời nhập đầy đủ thông tin";
     } else {
-        // Thực hiện thêm mới khi không có trùng lặp
-        $insertPHSql = "INSERT INTO lop (idLop, tenLop, idKhoa) VALUES ('$idLop', '$nameLop', '$idKhoa')";
-
-        if ($conn->query($insertPHSql) === TRUE) {
-            // Thêm mới thành công
-            $succes = "Thêm mới thành công.";
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (
+            preg_match($specialCharsPattern, $idLop) || preg_match($specialCharsPattern, $nameLop)
+            || preg_match($specialCharsPattern, $idKhoa)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
         } else {
-            // Lỗi khi thêm mới
-            $error = "Lỗi: " . $conn->error;
+            if ($result->num_rows > 0) {
+                // ID Lớp hoặc Tên Lớp đã tồn tại, thông báo lỗi
+                $error = "ID Lớp hoặc Tên Lớp đã tồn tại.";
+            } else {
+                // Thực hiện thêm mới khi không có trùng lặp
+                $insertPHSql = "INSERT INTO lop (idLop, tenLop, idKhoa) VALUES ('$idLop', '$nameLop', '$idKhoa')";
+
+                if ($conn->query($insertPHSql) === TRUE) {
+                    // Thêm mới thành công
+                    $succes = "Thêm mới thành công.";
+                } else {
+                    // Lỗi khi thêm mới
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
 }

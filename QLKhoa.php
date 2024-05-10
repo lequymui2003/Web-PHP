@@ -26,54 +26,67 @@ if (isset($_GET['logout'])) {
 ?>
 <?php
 // Xử lý tìm kiếm
+$error = "";
+$succes = "";
 $name = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
+     // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+     $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT * FROM khoa WHERE tenKhoa = '$name'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else{
+            if ($result) {
             if (mysqli_num_rows($result) > 0) {
                 // Lưu kết quả tìm kiếm vào một mảng
                 $searchResults = [];
                 while ($row = mysqli_fetch_assoc($result)) {
                     $searchResults[] = $row;
                 }
-            } else {
-                echo "Không tìm thấy kết quả.";
-            }
+            } 
         } else {
             echo "Lỗi: " . $conn->error;
         }
+        }
+        
     }
 }
 
-
-$error = "";
-$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idKhoa = $_POST["input1"];
     $nameKhoa = $_POST["input2"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem Tên Khoa đã tồn tại chưa (loại trừ khoa đang sửa)
     $checkDuplicateSql = "SELECT * FROM khoa WHERE tenKhoa = '$nameKhoa' AND idKhoa != '$idKhoa'";
     $result = $conn->query($checkDuplicateSql);
-
-    if ($result->num_rows > 0) {
-        // Tên Khoa đã tồn tại (trừ khoa đang sửa), thông báo lỗi
-        $error = "Tên Khoa đã tồn tại.";
+    if ($idKhoa == "" || $nameKhoa == "") {
+        $error = "Mời bạn chọn khoa cần sửa";
     } else {
-        // Thực hiện cập nhật khi không có trùng lặp
-        $updatePHSql = "UPDATE khoa SET tenKhoa = '$nameKhoa' WHERE idKhoa = '$idKhoa'";
-
-        if ($conn->query($updatePHSql) === TRUE) {
-            // Cập nhật thành công
-            $succes = "Cập nhật thành công.";
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (preg_match($specialCharsPattern, $idKhoa) || preg_match($specialCharsPattern, $nameKhoa)) {
+            $error = "Không nhập kí tự đặc biệt.";
         } else {
-            // Lỗi khi cập nhật
-            $error = "Lỗi: " . $conn->error;
+            if ($result->num_rows > 0) {
+                // Tên Khoa đã tồn tại (trừ khoa đang sửa), thông báo lỗi
+                $error = "Tên Khoa đã tồn tại.";
+            } else {
+                // Thực hiện cập nhật khi không có trùng lặp
+                $updatePHSql = "UPDATE khoa SET tenKhoa = '$nameKhoa' WHERE idKhoa = '$idKhoa'";
+
+                if ($conn->query($updatePHSql) === TRUE) {
+                    // Cập nhật thành công
+                    $succes = "Cập nhật thành công.";
+                } else {
+                    // Lỗi khi cập nhật
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
 }
@@ -82,24 +95,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idKhoa = $_POST["input1"];
     $nameKhoa = $_POST["input2"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem ID hoặc Tên Khoa đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM khoa WHERE idKhoa = '$idKhoa' OR tenKhoa = '$nameKhoa'";
     $result = $conn->query($checkDuplicateSql);
-
-    if ($result->num_rows > 0) {
-        // ID hoặc Tên Khoa đã tồn tại, thông báo lỗi
-        $error = "ID hoặc Tên Khoa đã tồn tại.";
+    if ($idKhoa == "" || $nameKhoa == "") {
+        $error = "Mời nhập đầy đủ thông tin";
     } else {
-        // Thực hiện thêm mới khi không có trùng lặp
-        $insertPHSql = "INSERT INTO khoa (idKhoa, tenKhoa) VALUES ('$idKhoa', '$nameKhoa')";
-
-        if ($conn->query($insertPHSql) === TRUE) {
-            // Thêm mới thành công
-            $succes = "Thêm mới thành công.";
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (preg_match($specialCharsPattern, $idKhoa) || preg_match($specialCharsPattern, $nameKhoa)) {
+            $error = "Không nhập kí tự đặc biệt.";
         } else {
-            // Lỗi khi thêm mới
-            $error = "Lỗi: " . $conn->error;
+            if ($result->num_rows > 0) {
+                // ID hoặc Tên Khoa đã tồn tại, thông báo lỗi
+                $error = "ID hoặc Tên Khoa đã tồn tại.";
+            } else {
+                // Thực hiện thêm mới khi không có trùng lặp
+                $insertPHSql = "INSERT INTO khoa (idKhoa, tenKhoa) VALUES ('$idKhoa', '$nameKhoa')";
+
+                if ($conn->query($insertPHSql) === TRUE) {
+                    // Thêm mới thành công
+                    $succes = "Thêm mới thành công.";
+                } else {
+                    // Lỗi khi thêm mới
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
 }

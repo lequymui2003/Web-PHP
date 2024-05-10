@@ -26,34 +26,39 @@ if (isset($_GET['logout'])) {
 ?>
 <?php
 // Xử lý tìm kiếm
+$error = "";
+$succes = "";
 $name = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     if (!empty($name)) {
-        // Xử lý tìm kiếm theo tên phòng
+        // Xử lý tìm kiếm theo tên giảng viên
         $searchPHSql = "SELECT giangvien.idGiangVien, giangvien.sdt, 
         giangvien.tenGV, giangvien.idKhoa, khoa.tenKhoa, khoa.idKhoa FROM giangvien 
         join khoa on giangvien.idKhoa = khoa.idKhoa WHERE tenGV LIKE '%$name%'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
-            if (mysqli_num_rows($result) > 0) {
-                // Lưu kết quả tìm kiếm vào một mảng
-                $searchResults = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $searchResults[] = $row;
-                }
-            } else {
-                // echo "Không tìm thấy kết quả.";
-            }
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
         } else {
-            echo "Lỗi: " . $conn->error;
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    // Lưu kết quả tìm kiếm vào một mảng
+                    $searchResults = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $searchResults[] = $row;
+                    }
+                } else {
+                    echo "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
 }
 
 
-$error = "";
-$succes = "";
+
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idGV = $_POST["input1"];
@@ -61,6 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $name = $_POST["input2"];
     $idKhoa = $_POST["input4"];
 
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     // Kiểm tra xem ID Giảng viên đã tồn tại chưa (loại trừ giảng viên đang sửa)
     $checkDuplicateSql = "SELECT * FROM giangvien WHERE idGiangVien = '$idGV'";
     $result = $conn->query($checkDuplicateSql);
@@ -69,25 +76,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $phonePattern = '/^(09|03)\d{8}$/'; // Mẫu số điện thoại: 10 chữ số
     $isValidPhone = preg_match($phonePattern, $SDT);
 
-    if ($result->num_rows > 0) {
-        // ID Giảng viên đã tồn tại (trừ giảng viên đang sửa), thông báo lỗi
-        $error = "ID Giảng viên đã tồn tại.";
-    } elseif (!$isValidPhone) {
-        // Số điện thoại không hợp lệ, thông báo lỗi
-        $error = "Số điện thoại không đúng định dạng.";
+    if ($idGV == "" || $SDT == "" || $name == "" || $idKhoa == "") {
+        $error = "Mời bạn chọn giảng viên cần sửa";
     } else {
-        // Thực hiện cập nhật khi không có trùng lặp và số điện thoại hợp lệ
-        $updatePHSql = "UPDATE giangvien SET sdt = '$SDT', tenGV = '$name', idKhoa = '$idKhoa'
+        if (
+            preg_match($specialCharsPattern, $idGV) || preg_match($specialCharsPattern, $SDT) ||
+            preg_match($specialCharsPattern, $name) || preg_match($specialCharsPattern, $idKhoa)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result->num_rows > 0) {
+                // ID Giảng viên đã tồn tại (trừ giảng viên đang sửa), thông báo lỗi
+                $error = "ID Giảng viên đã tồn tại.";
+            } elseif (!$isValidPhone) {
+                // Số điện thoại không hợp lệ, thông báo lỗi
+                $error = "Số điện thoại không đúng định dạng.";
+            } else {
+                // Thực hiện cập nhật khi không có trùng lặp và số điện thoại hợp lệ
+                $updatePHSql = "UPDATE giangvien SET sdt = '$SDT', tenGV = '$name', idKhoa = '$idKhoa'
                         WHERE idGiangVien = '$idGV'";
 
-        if ($conn->query($updatePHSql) === TRUE) {
-            // Cập nhật thành công
-            $succes = "Cập nhật thành công.";
-        } else {
-            // Lỗi khi cập nhật
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($updatePHSql) === TRUE) {
+                    // Cập nhật thành công
+                    $succes = "Cập nhật thành công.";
+                } else {
+                    // Lỗi khi cập nhật
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
+
     }
+
 }
 
 // Xử lý thêm
@@ -96,7 +116,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $SDT = $_POST["input3"];
     $name = $_POST["input2"];
     $idKhoa = $_POST["input4"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    // $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     // Kiểm tra xem ID Giảng viên đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM giangvien WHERE idGiangVien = '$idGV'";
     $result = $conn->query($checkDuplicateSql);
@@ -104,26 +125,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     // Kiểm tra định dạng số điện thoại
     $phonePattern = '/^(09|03)\d{8}$/'; // Mẫu số điện thoại: 10 chữ số
     $isValidPhone = preg_match($phonePattern, $SDT);
+    if ($idGV == "" || $SDT == "" || $name == "" || $idKhoa == "") {
+        $error = "Mời bạn nhập đầy đủ thông tin";
+    // } else {
+    //     if (
+    //         preg_match($specialCharsPattern, $idGV) || preg_match($specialCharsPattern, $SDT) ||
+    //         preg_match($specialCharsPattern, $name) || preg_match($specialCharsPattern, $idKhoa)
+    //     ) {
+    //         $error = "Không nhập kí tự đặc biệt.";
+         } else {
+            if ($result->num_rows > 0) {
+                // ID Giảng viên đã tồn tại, thông báo lỗi
+                $error = "ID Giảng viên đã tồn tại.";
+            } elseif (!$isValidPhone) {
+                // Số điện thoại không hợp lệ, thông báo lỗi
+                $error = "Số điện thoại không đúng định dạng.";
+            } else {
+                // Thực hiện thêm mới khi không có trùng lặp và số điện thoại hợp lệ
+                $insertPHSql = "INSERT INTO giangvien (idGiangVien, sdt, tenGV, idKhoa) VALUES ('$idGV', '$SDT', '$name', '$idKhoa')";
 
-    if ($result->num_rows > 0) {
-        // ID Giảng viên đã tồn tại, thông báo lỗi
-        $error = "ID Giảng viên đã tồn tại.";
-    } elseif (!$isValidPhone) {
-        // Số điện thoại không hợp lệ, thông báo lỗi
-        $error = "Số điện thoại không đúng định dạng.";
-    } else {
-        // Thực hiện thêm mới khi không có trùng lặp và số điện thoại hợp lệ
-        $insertPHSql = "INSERT INTO giangvien (idGiangVien, sdt, tenGV, idKhoa) VALUES ('$idGV', '$SDT', '$name', '$idKhoa')";
-
-        if ($conn->query($insertPHSql) === TRUE) {
-            // Thêm mới thành công
-            $succes = "Thêm mới thành công.";
-        } else {
-            // Lỗi khi thêm mới
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($insertPHSql) === TRUE) {
+                    // Thêm mới thành công
+                    $succes = "Thêm mới thành công.";
+                } else {
+                    // Lỗi khi thêm mới
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
+
     }
-}
+
 
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
@@ -238,7 +270,7 @@ require_once 'header.php';
                         <div class="row">
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-12">
                                 <form method="post" action="" class="d-flex justify-content-around form-search">
-                                    <input type="text" name="search-name" placeholder="Nhập tên môn"
+                                    <input type="text" name="search-name" placeholder="Nhập tên giảng viên"
                                         value="<?php echo $name ?>">
                                     <input type="submit" name="search" value="Tìm kiếm" class="input-style me-4">
                                 </form>

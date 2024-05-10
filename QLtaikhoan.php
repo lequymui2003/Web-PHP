@@ -1,15 +1,15 @@
 <?php
 include "./database/Class-Database.php";
 global $conn;
-if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
-    header("Location: login.php");
-    exit();
-}
+// if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
+//     header("Location: login.php");
+//     exit();
+// }
 
-if ($_SESSION["login"] !== "admin") {
-    header("Location: user.php");
-    exit();
-}
+// if ($_SESSION["login"] !== "admin") {
+//     header("Location: user.php");
+//     exit();
+// }
 if (isset($_GET['logout'])) {
     // Xóa cookie
     setcookie('username', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
@@ -27,31 +27,37 @@ if (isset($_GET['logout'])) {
 <?php
 // Xử lý tìm kiếm
 $name = "";
+$error = "";
+$succes = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT * FROM users WHERE role = '$name'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
-            if (mysqli_num_rows($result) > 0) {
-                // Lưu kết quả tìm kiếm vào một mảng
-                $searchResults = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $searchResults[] = $row;
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    // Lưu kết quả tìm kiếm vào một mảng
+                    $searchResults = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $searchResults[] = $row;
+                    }
+                } else {
+                    // echo "Không tìm thấy kết quả.";
                 }
             } else {
-                // echo "Không tìm thấy kết quả.";
+                echo "Lỗi: " . $conn->error;
             }
-        } else {
-            echo "Lỗi: " . $conn->error;
         }
+
     }
 }
 
-
-$error = "";
-$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $username = $_POST["input1"];
@@ -59,7 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $name = $_POST["input3"];
     $email = $_POST["input4"];
     $phanquyen = $_POST["input5"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem Username đã tồn tại chưa (loại trừ user đang sửa)
     $checkDuplicateSql = "SELECT * FROM users WHERE username = '$username' AND username != '$username'";
     $result = $conn->query($checkDuplicateSql);
@@ -70,30 +77,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
 
     // Kiểm tra định dạng Email
     $isValidEmail = preg_match('/^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,}@gmail\.com$/', $email);
-
-    if ($result->num_rows > 0) {
-        // Username đã tồn tại (loại trừ user đang sửa), thông báo lỗi
-        $error = "Username đã tồn tại.";
-    } elseif ($resultEmail->num_rows > 0) {
-        // Email đã tồn tại (loại trừ user đang sửa), thông báo lỗi
-        $error = "Email đã tồn tại.";
-    } elseif (!$isValidEmail) {
-        // Email không hợp lệ, thông báo lỗi
-        $error = "Email không đúng định dạng.";
-    } else {
-        // Thực hiện cập nhật khi không có trùng lặp và Email hợp lệ
-        $updatePHSql = "UPDATE users SET email = '$email', Name = '$name', role = '$phanquyen'
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (
+            preg_match($specialCharsPattern, $username) || preg_match($specialCharsPattern, $password)
+            || preg_match($specialCharsPattern, $name) || preg_match($specialCharsPattern, $email) || preg_match($specialCharsPattern, $phanquyen)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result->num_rows > 0) {
+                // Username đã tồn tại (loại trừ user đang sửa), thông báo lỗi
+                $error = "Username đã tồn tại.";
+            } elseif ($resultEmail->num_rows > 0) {
+                // Email đã tồn tại (loại trừ user đang sửa), thông báo lỗi
+                $error = "Email đã tồn tại.";
+            } elseif (!$isValidEmail) {
+                // Email không hợp lệ, thông báo lỗi
+                $error = "Email không đúng định dạng.";
+            } else {
+                // Thực hiện cập nhật khi không có trùng lặp và Email hợp lệ
+                $updatePHSql = "UPDATE users SET email = '$email', Name = '$name', role = '$phanquyen'
                         WHERE username = '$username'";
 
-        if ($conn->query($updatePHSql) === TRUE) {
-            // Cập nhật thành công
-            $succes = "Cập nhật thành công.";
-        } else {
-            // Lỗi khi cập nhật
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($updatePHSql) === TRUE) {
+                    // Cập nhật thành công
+                    $succes = "Cập nhật thành công.";
+                } else {
+                    // Lỗi khi cập nhật
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
-}
 
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
@@ -102,32 +116,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $name = $_POST["input3"];
     $email = $_POST["input4"];
     $phanquyen = $_POST["input5"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem Username hoặc Email đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM users WHERE username = '$username' OR email = '$email'";
     $result = $conn->query($checkDuplicateSql);
-
-
     // Kiểm tra định dạng Email
     $isValidEmail = preg_match('/^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,}@gmail\.com$/', $email);
-
-    if ($result->num_rows > 0) {
-        // Username hoặc Email đã tồn tại, thông báo lỗi
-        $error = "Username hoặc Email đã tồn tại.";
-    } elseif (!$isValidEmail) {
-        // Email không hợp lệ, thông báo lỗi
-        $error = "Email không đúng định dạng.";
-    } else {
-        // Thực hiện thêm mới khi không có trùng lặp và Email hợp lệ
-        $insertPHSql = "INSERT INTO users (username, password, Name, email, role) 
+   if (empty($username) || empty($_POST["input2"]) || empty($name) || empty($email)) {
+        $error = "Mời nhập đầy đủ thông tin";
+    }else {
+        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        if (
+            preg_match($specialCharsPattern, $username) || preg_match($specialCharsPattern, $password)
+            || preg_match($specialCharsPattern, $name)  || preg_match($specialCharsPattern, $phanquyen)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result->num_rows > 0) {
+                // Username hoặc Email đã tồn tại, thông báo lỗi
+                $error = "Username hoặc Email đã tồn tại.";
+            } elseif (!$isValidEmail) {
+                // Email không hợp lệ, thông báo lỗi
+                $error = "Email không đúng định dạng.";
+            } else {
+                // Thực hiện thêm mới khi không có trùng lặp và Email hợp lệ
+                $insertPHSql = "INSERT INTO users (username, password, Name, email, role) 
                         VALUES ('$username', '$password', '$name', '$email', '$phanquyen')";
 
-        if ($conn->query($insertPHSql) === TRUE) {
-            // Thêm mới thành công
-            $succes = "Thêm mới thành công.";
-        } else {
-            // Lỗi khi thêm mới
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($insertPHSql) === TRUE) {
+                    // Thêm mới thành công
+                    $succes = "Thêm mới thành công.";
+                } else {
+                    // Lỗi khi thêm mới
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
     }
 }

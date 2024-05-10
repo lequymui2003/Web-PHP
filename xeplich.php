@@ -55,9 +55,9 @@ $succes = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["update"])) {
         $idKhoa = $_POST["input1"];
-        $idMon = $_POST["input3"];
-        $idLop = $_POST["input2"];
-        $idGV = $_POST["input4"];
+        $idMon = $_POST["input3"] ="";
+        $idLop = $_POST["input2"]="";
+        $idGV = $_POST["input4"]="";
         $idPhong = $_POST["input5"];
         $TGBD = $_POST["input6"];
         $TGKT = $_POST["input7"];
@@ -74,25 +74,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $result = $conn->query($checkUpdateSql);
 
-        if ($result->num_rows > 0) {
-            $error = "Phòng này đã có lịch trong khoảng thời gian này!";
-
+        if ($idMon == "" || $idLop == "" || $idGV == "" || $TGBD == "" || $TGKT == "") {
+            $error = "Mời bạn chọn lịch học cần sửa và nhập đầy đủ thông tin";
         } else {
-            // Kiểm tra trùng lịch cho giảng viên
-            $checkSql = "SELECT * FROM xeplich 
-                WHERE idGV = '$idGV' 
-                AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
-                AND id != '$id'";
-
-            $result = $conn->query($checkSql);
-
             if ($result->num_rows > 0) {
-                $error = "Giảng viên này đã có lịch trong khoảng thời gian này!";
+                $error = "Phòng này đã có lịch trong khoảng thời gian này!";
+
             } else {
-                // Kiểm tra trùng lịch cho lớp học
+                // Kiểm tra trùng lịch cho giảng viên
                 $checkSql = "SELECT * FROM xeplich 
-                    WHERE idLop = '$idLop' 
+                    WHERE idGV = '$idGV' 
                     AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
                     OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
                     AND id != '$id'";
@@ -100,28 +91,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $result = $conn->query($checkSql);
 
                 if ($result->num_rows > 0) {
-                    $error = "Lớp đã có lịch học trong khoảng thời gian này!";
-
+                    $error = "Giảng viên này đã có lịch trong khoảng thời gian này!";
                 } else {
-                    // Tiến hành cập nhật dữ liệu vào cơ sở dữ liệu
-                    $updatePHSql = "UPDATE xeplich SET
-                        idMon = '$idMon',
-                        idLop = '$idLop',
-                        idGV = '$idGV',
-                        idPhong = '$idPhong',
-                        idKhoa = '$idKhoa',
-                        thoiGianBatDau = '$TGBD',
-                        TgianKetThuc = '$TGKT'
-                    WHERE id = '$id'";
+                    // Kiểm tra trùng lịch cho lớp học
+                    $checkSql = "SELECT * FROM xeplich 
+                        WHERE idLop = '$idLop' 
+                        AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
+                        OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
+                        AND id != '$id'";
 
-                    if ($conn->query($updatePHSql) === TRUE) {
-                        $succes = "Cập nhật thông tin lịch học thành công";
+                    $result = $conn->query($checkSql);
+
+                    if ($result->num_rows > 0) {
+                        $error = "Lớp đã có lịch học trong khoảng thời gian này!";
+
                     } else {
-                        $error = "Sửa lịch học thất bại";
+                        // Tiến hành cập nhật dữ liệu vào cơ sở dữ liệu
+                        $updatePHSql = "UPDATE xeplich SET
+                            idMon = '$idMon',
+                            idLop = '$idLop',
+                            idGV = '$idGV',
+                            idPhong = '$idPhong',
+                            idKhoa = '$idKhoa',
+                            thoiGianBatDau = '$TGBD',
+                            TgianKetThuc = '$TGKT'
+                        WHERE id = '$id'";
+
+                        if ($conn->query($updatePHSql) === TRUE) {
+                            $succes = "Cập nhật thông tin lịch học thành công";
+                        } else {
+                            $error = "Sửa lịch học thất bại";
+                        }
                     }
                 }
             }
         }
+
     }
 }
 
@@ -130,9 +135,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     // Lấy dữ liệu từ form thêm
     $idKhoa = $_POST["input1"];
-    $idMon = $_POST["input3"];
-    $idLop = $_POST["input2"];
-    $idGV = $_POST["input4"];
+    $idMon = $_POST["input3"] = "";
+    $idLop = $_POST["input2"] = "";
+    $idGV = $_POST["input4"] = "";
     $idPhong = $_POST["input5"];
     $TGBD = $_POST["input6"];
     $TGKT = $_POST["input7"];
@@ -145,56 +150,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
 
     $result = $conn->query($checkSql);
 
-    // Kiểm tra số lượng hàng trả về
-    if ($result->num_rows > 0) {
-        // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-        $error = "Giáo viên này đã có lịch dạy trong khoảng thời gian này!";
-
+    if ($idKhoa == "" || $idMon == "" || $idLop == "" || $idGV == "" || $idPhong == "" || $TGBD == "" || $TGKT == "") {
+        $error = "Mời nhập đầy đủ thông tin";
     } else {
-        // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã lớp đã chọn chưa
-        $checkSql = "SELECT * FROM xeplich 
-                     WHERE idLop = '$idLop' 
-                     AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                     OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT'))";
-
-        $result = $conn->query($checkSql);
-
         // Kiểm tra số lượng hàng trả về
         if ($result->num_rows > 0) {
             // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-            $error = " Lớp này đã có lịch trong khoảng thời gian này!";
+            $error = "Giáo viên này đã có lịch dạy trong khoảng thời gian này!";
 
         } else {
-            // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã phòng đã chọn chưa
+            // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã lớp đã chọn chưa
             $checkSql = "SELECT * FROM xeplich 
-                         WHERE idPhong = '$idPhong' 
-                         AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                         OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT'))";
+                 WHERE idLop = '$idLop' 
+                 AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
+                 OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT'))";
 
             $result = $conn->query($checkSql);
 
             // Kiểm tra số lượng hàng trả về
             if ($result->num_rows > 0) {
                 // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-                $error = "Phòng này đã có lịch trong khoảng thời gian này!";
+                $error = " Lớp này đã có lịch trong khoảng thời gian này!";
 
             } else {
-                // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
-                $insertPHSql = "INSERT INTO xeplich ( idMon, idLop, idGV, idPhong, idKhoa, thoiGianBatDau, TgianKetThuc) 
-                                VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$TGBD', '$TGKT')";
+                // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã phòng đã chọn chưa
+                $checkSql = "SELECT * FROM xeplich 
+                     WHERE idPhong = '$idPhong' 
+                     AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
+                     OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT'))";
 
+                $result = $conn->query($checkSql);
 
-                // Thực hiện câu lệnh INSERT và kiểm tra kết quả
-                if ($conn->query($insertPHSql) === TRUE) {
-                    // Thêm dữ liệu thành công
-                    $succes = "Thêm lịch học thành công";
+                // Kiểm tra số lượng hàng trả về
+                if ($result->num_rows > 0) {
+                    // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
+                    $error = "Phòng này đã có lịch trong khoảng thời gian này!";
+
                 } else {
-                    // Xử lý khi thêm dữ liệu thất bại
-                    $error = "Thêm lịch học thất bại";
+                    // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
+                    $insertPHSql = "INSERT INTO xeplich ( idMon, idLop, idGV, idPhong, idKhoa, thoiGianBatDau, TgianKetThuc) 
+                            VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$TGBD', '$TGKT')";
+
+
+                    // Thực hiện câu lệnh INSERT và kiểm tra kết quả
+                    if ($conn->query($insertPHSql) === TRUE) {
+                        // Thêm dữ liệu thành công
+                        $succes = "Thêm lịch học thành công";
+                    } else {
+                        // Xử lý khi thêm dữ liệu thất bại
+                        $error = "Thêm lịch học thất bại";
+                    }
                 }
             }
         }
     }
+
 }
 
 

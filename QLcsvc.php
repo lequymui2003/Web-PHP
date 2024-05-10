@@ -26,9 +26,13 @@ if (isset($_GET['logout'])) {
 ?>
 <?php
 // Xử lý tìm kiếm
+$error = "";
+$succes = "";
 $name = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
     $name = $_POST["search-name"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT cosovatchat.ten, ctcosovatchat.id,
@@ -36,53 +40,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
         FROM ctcosovatchat
         join cosovatchat on ctcosovatchat.id = cosovatchat.id WHERE idPhong = '$name'";
         $result = $conn->query($searchPHSql);
-        if ($result) {
-            if (mysqli_num_rows($result) > 0) {
-                // Lưu kết quả tìm kiếm vào một mảng
-                $searchResults = [];
-                while ($row = mysqli_fetch_assoc($result)) {
-                    $searchResults[] = $row;
+        if (preg_match($specialCharsPattern, $name)) {
+            $error = "Không nhập kí tự đặc biệt.";
+        } else {
+            if ($result) {
+                if (mysqli_num_rows($result) > 0) {
+                    // Lưu kết quả tìm kiếm vào một mảng
+                    $searchResults = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $searchResults[] = $row;
+                    }
+                } else {
+                    // echo "Không tìm thấy kết quả.";
                 }
             } else {
-                // echo "Không tìm thấy kết quả.";
+                echo "Lỗi: " . $conn->error;
             }
-        } else {
-            echo "Lỗi: " . $conn->error;
         }
+
     }
 }
 
-
-$error = "";
-$succes = "";
 // Xử lý sửa
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $id = $_POST["input1"];
     $SLT = $_POST["input3"];
     $SLX = $_POST["input4"];
     $idPhong = $_POST["input5"];
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()]/";
 
-    // Kiểm tra xem ID hoặc ID Phòng đã tồn tại chưa (loại trừ dòng đang sửa)
-    $checkDuplicateSql = "SELECT * FROM ctcosovatchat WHERE (id = '$id' OR idPhong = '$idPhong') AND NOT (id = '$id' AND idPhong = '$idPhong')";
-    $result = $conn->query($checkDuplicateSql);
-
-    if ($result->num_rows > 0) {
-        // ID hoặc ID Phòng đã tồn tại (loại trừ dòng đang sửa), thông báo lỗi
-        $error = "ID hoặc ID Phòng đã tồn tại.";
+    if ($id == "" || $SLT == "" || $SLX == "" || $idPhong == "") {
+        $error = "Mời bạn chọn cơ sở vật chất cần sửa";
     } else {
-        // Thực hiện cập nhật khi không có trùng lặp
-        $updatePHSql = "UPDATE ctcosovatchat SET SoLuongTot = '$SLT', 
-                        SoLuongXau = '$SLX' WHERE id = '$id' AND idPhong = '$idPhong'";
+        if (
+            preg_match($specialCharsPattern, $id) || preg_match($specialCharsPattern, $SLT) ||
+            preg_match($specialCharsPattern, $SLX) || preg_match($specialCharsPattern, $idPhong)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
+         } else {
+            // Thực hiện cập nhật
+            $updatePHSql = "UPDATE ctcosovatchat SET SoLuongTot = '$SLT', 
+                    SoLuongXau = '$SLX' WHERE id = '$id' AND idPhong = '$idPhong'";
 
-        if ($conn->query($updatePHSql) === TRUE) {
-            // Cập nhật thành công
-            $succes = "Cập nhật thành công.";
-        } else {
-            // Lỗi khi cập nhật
-            $error = "Lỗi: " . $conn->error;
+            if ($conn->query($updatePHSql) === TRUE) {
+                // Cập nhật thành công
+                $succes = "Cập nhật thành công.";
+            } else {
+                // Lỗi khi cập nhật
+                $error = "Lỗi: " . $conn->error;
+            }
         }
     }
+
 }
+
 
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
@@ -90,28 +102,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $SLT = $_POST["input3"];
     $SLX = $_POST["input4"];
     $idPhong = $_POST["input5"];
-
+    // Biểu thức chính quy để kiểm tra ký tự đặc biệt
+    $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem ID hoặc ID Phòng đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM ctcosovatchat WHERE id = '$id' and idPhong = '$idPhong'";
     $result = $conn->query($checkDuplicateSql);
-
-    if ($result->num_rows > 0) {
-        // ID hoặc ID Phòng đã tồn tại, thông báo lỗi
-        $error = "ID hoặc ID Phòng đã tồn tại.";
+    if ($id == "" || $SLT == "" || $SLX == "" || $idPhong == "") {
+        $error = "Mời nhập đầy đủ thông tin";
     } else {
-        // Thực hiện thêm mới khi không có trùng lặp
-        $insertPHSql = "INSERT INTO ctcosovatchat (id, SoLuongTot, SoLuongXau, idPhong) 
+        if (
+            preg_match($specialCharsPattern, $id) || preg_match($specialCharsPattern, $SLT) ||
+            preg_match($specialCharsPattern, $SLX) || preg_match($specialCharsPattern, $idPhong)
+        ) {
+            $error = "Không nhập kí tự đặc biệt.";
+         } else {
+            if ($result->num_rows > 0) {
+                // ID hoặc ID Phòng đã tồn tại, thông báo lỗi
+                $error = "ID hoặc ID Phòng đã tồn tại.";
+            } else {
+                // Thực hiện thêm mới khi không có trùng lặp
+                $insertPHSql = "INSERT INTO ctcosovatchat (id, SoLuongTot, SoLuongXau, idPhong) 
                         VALUES ('$id', '$SLT', '$SLX', '$idPhong')";
 
-        if ($conn->query($insertPHSql) === TRUE) {
-            // Thêm mới thành công
-            $succes = "Thêm mới thành công.";
-        } else {
-            // Lỗi khi thêm mới
-            $error = "Lỗi: " . $conn->error;
+                if ($conn->query($insertPHSql) === TRUE) {
+                    // Thêm mới thành công
+                    $success = "Thêm mới thành công.";
+                } else {
+                    // Lỗi khi thêm mới
+                    $error = "Lỗi: " . $conn->error;
+                }
+            }
         }
+
     }
 }
+
 
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
