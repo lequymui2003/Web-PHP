@@ -42,12 +42,13 @@ if (isset($_GET['logout'])) {
 $name = "";
 if (isset($_POST['search2'])) {
     $searchPHSql = "SELECT xeplich.idPhong, phonghoc.tenPhong, 
-    monhoc.tenMon, giangvien.tenGV, 
+    monhoc.tenMon, giangvien.tenGV, lop.tenLop,
     xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
     FROM xeplich 
     join phonghoc on xeplich.idPhong = phonghoc.idPhong 
     join giangvien on xeplich.idGV = giangvien.idGiangVien
-    join monhoc on xeplich.idMon = monhoc.idMon 
+    join monhoc on xeplich.idMon = monhoc.idMon
+    join lop on xeplich.idLop = lop.idLop 
     WHERE xeplich.tinhTrang = 'Trống'";
     $result = $conn->query($searchPHSql);
     if ($result) {
@@ -61,13 +62,14 @@ if (isset($_POST['search2'])) {
     }
 } elseif (isset($_POST['search3'])) {
     $searchPHSql = "SELECT xeplich.idPhong, phonghoc.tenPhong, 
-    monhoc.tenMon, giangvien.tenGV, 
+    monhoc.tenMon, giangvien.tenGV, lop.tenLop, 
     xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
     FROM xeplich 
     join phonghoc on xeplich.idPhong = phonghoc.idPhong 
     join giangvien on xeplich.idGV = giangvien.idGiangVien
     join monhoc on xeplich.idMon = monhoc.idMon
-        WHERE xeplich.tinhTrang = 'Đã đăng ký'";
+    join lop on xeplich.idLop = lop.idLop
+    WHERE xeplich.tinhTrang = 'Đã đăng ký'";
     $result = $conn->query($searchPHSql);
     if ($result) {
         if (mysqli_num_rows($result) > 0) {
@@ -85,12 +87,13 @@ if (isset($_POST['search2'])) {
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT xeplich.idPhong, phonghoc.tenPhong, 
-        monhoc.tenMon, giangvien.tenGV, 
+        monhoc.tenMon, giangvien.tenGV, lop.tenLop,
         xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
         FROM xeplich 
         join phonghoc on xeplich.idPhong = phonghoc.idPhong 
         join giangvien on xeplich.idGV = giangvien.idGiangVien
         join monhoc on xeplich.idMon = monhoc.idMon 
+        join lop on xeplich.idLop = lop.idLop
         WHERE phonghoc.tenPhong = '$name'";
         $result = $conn->query($searchPHSql);
         if ($result) {

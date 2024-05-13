@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
         // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
         if (
             preg_match($specialCharsPattern, $username) || preg_match($specialCharsPattern, $password)
-            || preg_match($specialCharsPattern, $name) || preg_match($specialCharsPattern, $email) || preg_match($specialCharsPattern, $phanquyen)
+            || preg_match($specialCharsPattern, $name)  || preg_match($specialCharsPattern, $phanquyen)
         ) {
             $error = "Không nhập kí tự đặc biệt.";
         } else {
@@ -123,7 +123,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $result = $conn->query($checkDuplicateSql);
     // Kiểm tra định dạng Email
     $isValidEmail = preg_match('/^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,}@gmail\.com$/', $email);
-   if (empty($username) || empty($_POST["input2"]) || empty($name) || empty($email)) {
+//    if (empty($username) || empty($_POST["input2"]) || empty($name) || empty($email)) {
+    if (empty($name) || empty($email)) {
         $error = "Mời nhập đầy đủ thông tin";
     }else {
         // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
@@ -292,7 +293,7 @@ require_once 'header.php';
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">Email: </label>
-                                        <input type="text" placeholder="Nhập ID khoa" style="padding: 2px 3px"
+                                        <input type="text" placeholder="Nhập Email" style="padding: 2px 3px"
                                             class="rounded" name="input4">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">

@@ -42,12 +42,21 @@ async function addTK(username, password, Name, email, role) {
 async function runTestCases() {
     try {
         await addTK('', '1234', 'Nguyễn Ngọc Minh', '20211135@gmail.com', 'user');
-        console.log('Test case 1: Không nhập username - PASS');
+        console.log('Test case 1: Không nhập username - False');
 
-        await addTK('20211135', '', 'Lê Thùy Dương', '20211135@gmail.com', 'user');
-        console.log('Test case 2: Không nhập mật khẩu - PASS');
+        await addTK('20211136', '', 'Lê Thùy Dương', '20211136@gmail.com', 'user');
+        console.log('Test case 2: Không nhập mật khẩu - False');
 
-        await addTK('20211135', '1234', 'Lê Thùy Dương', '20211135@gmail.com', 'user');
+        await addTK('20211136', '1234', '', '20211136@gmail.com', 'user');
+        console.log('Test case 2: Không nhập họ và tên - Pass');
+
+        await addTK('20211137', '1234', 'Lê Thùy Dương', '', 'user');
+        console.log('Test case 2: Không nhập email - Pass');
+
+        await addTK('20211141', '1234', 'Nguyễn Ngọc Anh', '20211140@gmail,com', 'user');
+        console.log('Test case 2: Nhập email sai định dạng - Pass');
+
+        await addTK('20211140', '1234', 'Nguyễn Ngọc Anh', '20211140@gmail.com', 'user');
         console.log('Test case 3: Nhập đầy đủ thông tin - PASS');
 
         await addTK('20211133', 'mui29062003', 'Lê Quý Mùi', "lequymui290603@gmail.com", 'user');

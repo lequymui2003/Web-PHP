@@ -1,15 +1,15 @@
 <?php
 include "./database/Class-Database.php";
 global $conn;
-// if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
-//     header("Location: login.php");
-//     exit();
-// }
+if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
+    header("Location: login.php");
+    exit();
+}
 
-// if ($_SESSION["login"] !== "admin") {
-//     header("Location: user.php");
-//     exit();
-// }
+if ($_SESSION["login"] !== "admin") {
+    header("Location: user.php");
+    exit();
+}
 if (isset($_GET['logout'])) {
     // Xóa cookie
     setcookie('username', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
