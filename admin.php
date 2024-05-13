@@ -1,15 +1,15 @@
 <?php
 include "./database/Class-Database.php";
 global $conn;
-if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
-    header("Location: login.php");
-    exit();
-}
+// if (!isset($_SESSION["login"]) || empty($_SESSION["login"])) {
+//     header("Location: login.php");
+//     exit();
+// }
 
-if ($_SESSION["login"] !== "admin") {
-    header("Location: user.php");
-    exit();
-}
+// if ($_SESSION["login"] !== "admin") {
+//     header("Location: user.php");
+//     exit();
+// }
 if (isset($_GET['logout'])) {
     // Xóa cookie
     setcookie('username', '', time() - (86400) * 30); // Đặt thời gian hết hạn ở quá khứ
@@ -95,18 +95,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
     //Biểu thức chính quy để kiểm tra ký tự đặc biệt
-    $specialCharsPattern = "/[!@#\$%\^\&*()]/";
+    // $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     //Kiểm tra xem ID hoặc Tên Phòng đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM phonghoc WHERE idPhong = '$idPH' or tenPhong = '$namePH'";
     $result = $conn->query($checkDuplicateSql);
 
     if ($idPH == "" || $namePH == "") {
         $error = "Mời nhập đầy đủ thông tin";
-    } else {
+    } //else {
         // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
-        if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
-            $error = "Không nhập kí tự đặc biệt.";
-         } else {
+        // if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
+        //     $error = "Không nhập kí tự đặc biệt.";
+         else {
             if ($result->num_rows > 0) {
                 // ID hoặc Tên Phòng đã tồn tại, thông báo lỗi
                 $error = "ID hoặc Tên Phòng đã tồn tại.";
@@ -123,9 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
                 }
             }
         }
-
     }
-}
 
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {

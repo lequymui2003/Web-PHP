@@ -42,15 +42,15 @@ async function runTestCases() {
         console.log('Test case 2: tên phòng để trống - PASS');
 
         await addPH('@^#@&#*', 'Phòng 12');
-        console.log('Test case 3: Id phòng nhập kí tự đặc biệt - PASS');
+        console.log('Test case 3: Id phòng nhập kí tự đặc biệt - Fail');
 
         await addPH('P012', '@^#@&#*');
-        console.log('Test case 4: Tên phòng nhập kí tự đặc biệt - PASS');
+        console.log('Test case 4: Tên phòng nhập kí tự đặc biệt - Fail');
      
         await addPH('P001', 'Phòng 1');
         console.log('Test case 5: Id phòng và tên phòng đã tồn tại - PASS');
 
-        await addPH('P012', 'Phòng 12');
+        await addPH('P013', 'Phòng 13');
         console.log('Test case 6: Thêm thành công phòng học - PASS');
 
     } catch (error) {
