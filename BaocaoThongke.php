@@ -88,7 +88,7 @@ if (isset($_POST['search'])) {
 }
 
 $sql = mysqli_query($conn, "SELECT phonghoc.idPhong, phonghoc.tenPhong,
-xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
+xeplich.Date, xeplich.ThoiGian, xeplich.tinhTrang
 FROM phonghoc join xeplich on phonghoc.idPhong = xeplich.idPhong");
 if (mysqli_num_rows($sql) === 0) {
 }
@@ -119,8 +119,8 @@ require_once 'header.php';
                                         <tr class="table-dark text-white">
                                             <th>ID Phòng</th>
                                             <th>Tên Phòng</th>
-                                            <th>Thời gian bắt đầu</th>
-                                            <th>Thời gian kết thúc</th>
+                                            <th>Ngày</th>
+                                            <th>Thời gian</th>
                                             <th>Tình trạng</th>
                                         </tr>
                                     </thead>
@@ -139,10 +139,10 @@ require_once 'header.php';
                                                         <?php echo $searchResult["tenPhong"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $searchResult["thoiGianBatDau"] ?>
+                                                        <?php echo $searchResult["Date"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $searchResult["TgianKetThuc"] ?>
+                                                        <?php echo $searchResult["ThoiGian"] ?>
                                                     </td>
                                                     <td>
                                                         <?php echo $searchResult["tinhTrang"] ?>
@@ -166,10 +166,10 @@ require_once 'header.php';
                                                         <?php echo $row["tenPhong"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $row["thoiGianBatDau"] ?>
+                                                        <?php echo $row["Date"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $row["TgianKetThuc"] ?>
+                                                        <?php echo $row["ThoiGian"] ?>
                                                     </td>
                                                     <td>
                                                         <?php echo $row["tinhTrang"] ?>

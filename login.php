@@ -58,7 +58,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 setcookie('username', $_REQUEST["user_name"], time() - (86400) * 30);
                 setcookie('password', $_REQUEST["user_password"], time() - (86400) * 30);
             }
-            header("Location: admin.php");
+            // Phân biệt người dùng dựa trên vai trò (role)
+            if ($_SESSION["login"] === "admin") {
+                header("Location: admin.php"); // Chuyển đến trang quản trị cho admin
+            } else if ($_SESSION["login"] === "user") {
+                header("Location: user.php"); // Chuyển đến trang người dùng cho user
+            }
             exit();
         } else {
             $error = "Tên đăng nhập hoặc mật khẩu không đúng";
@@ -129,7 +134,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
 
                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                            <a href="forgetPassword.php" id="forgotPassword" class="float-start float-sm-end size-text">Quên
+                            <a href="forgetPassword.php" id="forgotPassword"
+                                class="float-start float-sm-end size-text">Quên
                                 mật khẩu ?</a>
                         </div>
                     </div>

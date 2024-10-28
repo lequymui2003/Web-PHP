@@ -54,7 +54,7 @@ global $conn;
             
                         // Mã hóa mật khẩu mới và cập nhật vào cơ sở dữ liệu
                         $hashedPassword = md5($newPassword);
-                        $updatePasswordSql = "UPDATE users SET password = '$hashedPassword' WHERE username = " . $row['username'];
+                        $updatePasswordSql = "UPDATE users SET password = '$hashedPassword' WHERE username = '" . $row['username'] . "'";
 
                         if (mysqli_query($conn, $updatePasswordSql)) {
                             // Hiển thị mật khẩu mới cho người dùng

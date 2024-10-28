@@ -184,7 +184,6 @@ require_once 'header.php';
                             <thead>
                                 <tr class="table-dark text-white">
                                     <th>Username</th>
-                                    <th>Password</th>
                                     <th>Họ và tên</th>
                                     <th>Email</th>
                                     <th>Phân quyền</th>
@@ -201,9 +200,6 @@ require_once 'header.php';
                                         <tr class="<?php echo $class ?>">
                                             <td>
                                                 <?php echo $searchResult["username"] ?>
-                                            </td>
-                                            <td>
-                                                <?php echo $searchResult["password"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["Name"] ?>
@@ -235,9 +231,6 @@ require_once 'header.php';
                                         <tr class="<?php echo $class ?>">
                                             <td>
                                                 <?php echo $row["username"] ?>
-                                            </td>
-                                            <td>
-                                                <?php echo $row["password"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $row["Name"] ?>

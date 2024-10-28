@@ -40,55 +40,13 @@ if (isset($_GET['logout'])) {
 }
 //xử lý tìm kiếm bằng trống và phòng đã đăng ký
 $name = "";
-if (isset($_POST['search2'])) {
-    $searchPHSql = "SELECT xeplich.idPhong, phonghoc.tenPhong, 
-    monhoc.tenMon, giangvien.tenGV, lop.tenLop,
-    xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
-    FROM xeplich 
-    join phonghoc on xeplich.idPhong = phonghoc.idPhong 
-    join giangvien on xeplich.idGV = giangvien.idGiangVien
-    join monhoc on xeplich.idMon = monhoc.idMon
-    join lop on xeplich.idLop = lop.idLop 
-    WHERE xeplich.tinhTrang = 'Trống'";
-    $result = $conn->query($searchPHSql);
-    if ($result) {
-        if (mysqli_num_rows($result) > 0) {
-            // Lưu kết quả tìm kiếm vào một mảng
-            $searchResults = [];
-            while ($row = mysqli_fetch_assoc($result)) {
-                $searchResults[] = $row;
-            }
-        }
-    }
-} elseif (isset($_POST['search3'])) {
-    $searchPHSql = "SELECT xeplich.idPhong, phonghoc.tenPhong, 
-    monhoc.tenMon, giangvien.tenGV, lop.tenLop, 
-    xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
-    FROM xeplich 
-    join phonghoc on xeplich.idPhong = phonghoc.idPhong 
-    join giangvien on xeplich.idGV = giangvien.idGiangVien
-    join monhoc on xeplich.idMon = monhoc.idMon
-    join lop on xeplich.idLop = lop.idLop
-    WHERE xeplich.tinhTrang = 'Đã đăng ký'";
-    $result = $conn->query($searchPHSql);
-    if ($result) {
-        if (mysqli_num_rows($result) > 0) {
-            // Lưu kết quả tìm kiếm vào một mảng
-            $searchResults = [];
-            while ($row = mysqli_fetch_assoc($result)) {
-                $searchResults[] = $row;
-            }
-        } else {
-
-        }
-    }
-} elseif (isset($_POST["search"])) {
+if(isset($_POST["search"])) {
     $name = $_POST["search-name"];
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
         $searchPHSql = "SELECT xeplich.idPhong, phonghoc.tenPhong, 
         monhoc.tenMon, giangvien.tenGV, lop.tenLop,
-        xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
+        xeplich.Date, xeplich.ThoiGian, xeplich.tinhTrang
         FROM xeplich 
         join phonghoc on xeplich.idPhong = phonghoc.idPhong 
         join giangvien on xeplich.idGV = giangvien.idGiangVien
@@ -111,24 +69,84 @@ if (isset($_POST['search2'])) {
         }
     }
 }
-
+$error = "";
+$succes = "";
 // Xử lý đăng ký
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["dangky"])) {
-    $idPhong = $_POST["idPhong"];
-    $TGBD = $_POST["TGBD"];
-    $TGKT = $_POST["TGKT"];
+    // Lấy dữ liệu từ form thêm
+    $idKhoa = $_POST["input1"];
+    $idMon = $_POST["input3"];
+    $idLop = $_POST["input2"];
+    $idGV = $_POST["input4"];
+    $idPhong = $_POST["input5"];
+    $time = $_POST["input7"];
+    $date = $_POST["input6"];
 
-    $deletePHSql = "UPDATE  xeplich set tinhTrang ='Đã đăng ký' 
-    WHERE idPhong ='$idPhong' and thoiGianBatDau ='$TGBD' 
-    and TgianKetThuc ='$TGKT'";
-    if ($conn->query($deletePHSql) === TRUE) {
+    // Kiểm tra xem giáo viên đã có lịch dạy trong khoảng thời gian này chưa
+    $checkSql = "SELECT * FROM xeplich 
+                 WHERE idGV = '$idGV' 
+                 AND (Date = '$date' AND ThoiGian = '$time')";
+
+    $result = $conn->query($checkSql);
+
+    if ($idKhoa == "" || $idMon == "" || $idLop == "" || $idGV == "" || $idPhong == "" || $date == "" || $time == "") {
+        $error = "Mời nhập đầy đủ thông tin";
     } else {
+        // Kiểm tra số lượng hàng trả về
+        if ($result->num_rows > 0) {
+            // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
+            $error = "Giáo viên này đã có lịch dạy trong khoảng thời gian này!";
+
+        } else {
+            // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã lớp đã chọn chưa
+            $checkSql = "SELECT * FROM xeplich 
+                 WHERE idLop = '$idLop' 
+                 AND (Date = '$date' AND ThoiGian = '$time')";
+
+            $result = $conn->query($checkSql);
+
+            // Kiểm tra số lượng hàng trả về
+            if ($result->num_rows > 0) {
+                // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
+                $error = " Lớp này đã có lịch trong khoảng thời gian này!";
+
+            } else {
+                // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã phòng đã chọn chưa
+                $checkSql = "SELECT * FROM xeplich 
+                     WHERE idPhong = '$idPhong' 
+                     AND (Date = '$date' AND ThoiGian = '$time')";
+
+                $result = $conn->query($checkSql);
+
+                // Kiểm tra số lượng hàng trả về
+                if ($result->num_rows > 0) {
+                    // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
+                    $error = "Phòng này đã có lịch trong khoảng thời gian này!";
+
+                } else {
+                    // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
+                    $insertPHSql = "INSERT INTO xeplich ( idMon, idLop, idGV, idPhong, idKhoa, Date, ThoiGian) 
+                            VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$date', '$time')";
+
+
+                    // Thực hiện câu lệnh INSERT và kiểm tra kết quả
+                    if ($conn->query($insertPHSql) === TRUE) {
+                        // Thêm dữ liệu thành công
+                        $succes = "Thêm lịch học thành công";
+                    } else {
+                        // Xử lý khi thêm dữ liệu thất bại
+                        $error = "Thêm lịch học thất bại";
+                    }
+                }
+            }
+        }
     }
+
 }
 
 $sql = mysqli_query($conn, "SELECT xeplich.idPhong, phonghoc.tenPhong, 
 monhoc.tenMon, giangvien.tenGV, lop.tenLop,
-xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang
+xeplich.Date, xeplich.ThoiGian, xeplich.tinhTrang
 FROM xeplich 
 join phonghoc on xeplich.idPhong = phonghoc.idPhong 
 join giangvien on xeplich.idGV = giangvien.idGiangVien
@@ -156,6 +174,37 @@ if (mysqli_num_rows($sql) === 0) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="./assets/css/main.css">
     <title>User</title>
+    <style>
+        /* Giới hạn chiều cao modal để không có thanh cuộn */
+        .modal-content {
+            max-height: 90vh;
+            /* Giới hạn chiều cao tối đa modal */
+            overflow-y: auto;
+            /* Tự động cuộn nội dung nếu vượt quá */
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-lg {
+            max-width: 700px;
+            /* Điều chỉnh độ rộng modal */
+        }
+
+        /* Style cho nút đăng ký */
+        button[type="submit"] {
+            background-color: #0d6efd;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #084298;
+        }
+    </style>
 </head>
 
 <body class="custom-scrollbar">
@@ -219,12 +268,9 @@ if (mysqli_num_rows($sql) === 0) {
                             <div class="col-xs-4 col-sm-12 col-md-12 col-lg-6 mt-3">
                                 <div class="row">
                                     <div class="col-xs-4 col-sm-12 col-md-12 col-lg-12 d-flex flex-row-reverse">
-                                        <form method="post" action="" class="form-search me-4 ">
-                                            <input type="submit" name="search2" value="Phòng trống"
-                                                class="input-style me-3">
-                                            <input type="submit" name="search3" value="Phòng đã đăng ký"
-                                                class="input-style">
-                                        </form>
+                                        <!-- Nút mở modal để đăng ký phòng -->
+                                        <button type="button" class="input-style me-3" data-bs-toggle="modal"
+                                            data-bs-target="#registerModal">Đăng ký phòng</button>
                                     </div>
                                 </div>
                             </div>
@@ -239,10 +285,9 @@ if (mysqli_num_rows($sql) === 0) {
                                             <th>Tên phòng</th>
                                             <th>Tên lớp</th>
                                             <th>Môn</th>
-                                            <th>GIảng viên</th>
-                                            <th>Thời gian bắt đầu</th>
-                                            <th>Thời gian kết thúc</th>
-                                            <th>Chức năng</th>
+                                            <th>Giảng viên</th>
+                                            <th>Ngày</th>
+                                            <th>Thời gian</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -269,33 +314,11 @@ if (mysqli_num_rows($sql) === 0) {
                                                         <?php echo $searchResult["tenGV"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $searchResult["thoiGianBatDau"] ?>
+                                                        <?php echo $searchResult["Date"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $searchResult["TgianKetThuc"] ?>
+                                                        <?php echo $searchResult["ThoiGian"] ?>
                                                     </td>
-                                                    <?php
-                                                    if ($searchResult['tinhTrang'] === 'Trống') {
-                                                        ?>
-                                                        <td>
-                                                            <form action="" method='post'>
-                                                                <input type="hidden" name="idPhong"
-                                                                    value="<?php echo $row["idPhong"] ?>">
-                                                                <input type="hidden" name="TGBD"
-                                                                    value="<?php echo $row["thoiGianBatDau"] ?>">
-                                                                <input type="hidden" name="TGKT"
-                                                                    value="<?php echo $row["TgianKetThuc"] ?>">
-                                                                <input type="submit" name="dangky" value="Đăng ký"
-                                                                    class="input-style"></input>
-                                                            </form>
-                                                        </td>
-                                                        <?php
-                                                    } else {
-                                                        ?>
-                                                        <td>Đã đăng ký</td>
-                                                        <?php
-                                                    }
-                                                    ?>
                                                 </tr>
                                                 <?php
                                                 $i++;
@@ -324,33 +347,11 @@ if (mysqli_num_rows($sql) === 0) {
                                                         <?php echo $row["tenGV"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $row["thoiGianBatDau"] ?>
+                                                        <?php echo $row["Date"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $row["TgianKetThuc"] ?>
+                                                        <?php echo $row["ThoiGian"] ?>
                                                     </td>
-                                                    <?php
-                                                    if ($row['tinhTrang'] === 'Trống') {
-                                                        ?>
-                                                        <td>
-                                                            <form action="" method='post'>
-                                                                <input type="hidden" name="idPhong"
-                                                                    value="<?php echo $row["idPhong"] ?>">
-                                                                <input type="hidden" name="TGBD"
-                                                                    value="<?php echo $row["thoiGianBatDau"] ?>">
-                                                                <input type="hidden" name="TGKT"
-                                                                    value="<?php echo $row["TgianKetThuc"] ?>">
-                                                                <input type="submit" name="dangky" value="Đăng ký"
-                                                                    class="input-style"></input>
-                                                            </form>
-                                                        </td>
-                                                        <?php
-                                                    } else {
-                                                        ?>
-                                                        <td>Đã đăng ký</td>
-                                                        <?php
-                                                    }
-                                                    ?>
                                                 </tr>
                                                 <?php
                                                 $i++;
@@ -365,7 +366,7 @@ if (mysqli_num_rows($sql) === 0) {
                 </div>
             </div>
         </section>
-        <!-- Thêm modal vào trang -->
+        <!-- Thêm modal đổi mật khẩu vào trang -->
         <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
@@ -398,6 +399,115 @@ if (mysqli_num_rows($sql) === 0) {
                             <button name="changepassword" type="submit" class="btn btn-primary">Đổi mật khẩu</button>
                         </form>
 
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal để đăng ký phòng -->
+        <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="registerModalLabel">Đăng ký phòng học</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form đăng ký phòng học -->
+                        <form id="registerForm" method="post" action="">
+                            <div class="mb-3 row">
+                                <label for="idKhoa" class="col-sm-4 col-form-label">ID Khoa:</label>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $getEmptyRoomsSql = "SELECT idKhoa FROM khoa";
+                                    $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
+                                    if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
+                                        echo '<select id="input1" name="input1" class="form-control">';
+                                        while ($row = $emptyRoomsResult->fetch_assoc()) {
+                                            echo '<option value="' . $row['idKhoa'] . '">' . $row['idKhoa'] . '</option>';
+                                        }
+                                        echo '</select>';
+                                    } else {
+                                        echo 'Không có dữ liệu.';
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="idLop" class="col-sm-4 col-form-label">ID Lớp:</label>
+                                <div class="col-sm-8">
+                                    <select id="input2" name="input2" class="form-control">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="idMon" class="col-sm-4 col-form-label">ID Môn:</label>
+                                <div class="col-sm-8">
+                                    <select id="input3" name="input3" class="form-control">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="idGV" class="col-sm-4 col-form-label">ID Giảng viên:</label>
+                                <div class="col-sm-8">
+                                    <select id="input4" name="input4" class="form-control">
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="idPhong" class="col-sm-4 col-form-label">ID Phòng:</label>
+                                <div class="col-sm-8">
+                                    <?php
+                                    $getEmptyRoomsSql = "SELECT idPhong FROM phonghoc";
+                                    $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
+
+                                    if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
+                                        echo '<select name="input5" class="form-control">';
+                                        while ($row = $emptyRoomsResult->fetch_assoc()) {
+                                            echo '<option value="' . $row['idPhong'] . '">' . $row['idPhong'] . '</option>';
+                                        }
+                                        echo '</select>';
+                                    } else {
+                                        echo 'Không có dữ liệu.';
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="Date" class="col-sm-4 col-form-label">Ngày:</label>
+                                <div class="col-sm-8">
+                                    <input type="date" class="form-control" name="input6">
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label for="ThoiGian" class="col-sm-4 col-form-label">Thời gian:</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control" name="input7">
+                                        <option value="Ca 1">Ca 1</option>
+                                        <option value="Ca 2">Ca 2</option>
+                                        <option value="Ca 3">Ca 3</option>
+                                        <option value="Ca 4">Ca 4</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="ms-2 mt-2">
+                                <label for="" class="text-red">
+                                    <?php
+                                    echo $error;
+                                    echo $succes;
+                                    ?>
+                                </label>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" name="dangky" class="btn btn-primary">Đăng ký</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

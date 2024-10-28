@@ -55,12 +55,12 @@ $succes = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["update"])) {
         $idKhoa = $_POST["input1"];
-        $idMon = $_POST["input3"] ="";
-        $idLop = $_POST["input2"]="";
-        $idGV = $_POST["input4"]="";
+        $idMon = $_POST["input3"];
+        $idLop = $_POST["input2"];
+        $idGV = $_POST["input4"];
         $idPhong = $_POST["input5"];
-        $TGBD = $_POST["input6"];
-        $TGKT = $_POST["input7"];
+        $date = $_POST["input6"];
+        $time = $_POST["input7"];
 
         $result = mysqli_query($conn, "SELECT * FROM xeplich");
         $row = mysqli_fetch_assoc($result);
@@ -68,13 +68,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $checkUpdateSql = "SELECT * FROM xeplich 
             WHERE idPhong = '$idPhong' 
-            AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-            OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
+            AND (Date = '$date' AND ThoiGian = '$time') 
             AND id != '$id'"; // Loại trừ bản ghi hiện tại đang được sửa
 
         $result = $conn->query($checkUpdateSql);
 
-        if ($idMon == "" || $idLop == "" || $idGV == "" || $TGBD == "" || $TGKT == "") {
+        if ($idMon == "" || $idLop == "" || $idGV == "" || $date == "" || $time == "") {
             $error = "Mời bạn chọn lịch học cần sửa và nhập đầy đủ thông tin";
         } else {
             if ($result->num_rows > 0) {
@@ -84,8 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Kiểm tra trùng lịch cho giảng viên
                 $checkSql = "SELECT * FROM xeplich 
                     WHERE idGV = '$idGV' 
-                    AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                    OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
+                    AND (Date = '$date' AND ThoiGian = '$time') 
                     AND id != '$id'";
 
                 $result = $conn->query($checkSql);
@@ -96,8 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     // Kiểm tra trùng lịch cho lớp học
                     $checkSql = "SELECT * FROM xeplich 
                         WHERE idLop = '$idLop' 
-                        AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                        OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT')) 
+                        AND (Date = '$date' AND ThoiGian = '$time') 
                         AND id != '$id'";
 
                     $result = $conn->query($checkSql);
@@ -113,8 +110,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             idGV = '$idGV',
                             idPhong = '$idPhong',
                             idKhoa = '$idKhoa',
-                            thoiGianBatDau = '$TGBD',
-                            TgianKetThuc = '$TGKT'
+                            Date = '$date',
+                            ThoiGian = '$time'
                         WHERE id = '$id'";
 
                         if ($conn->query($updatePHSql) === TRUE) {
@@ -129,85 +126,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     }
 }
-
-
-// chức năng thêm
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
-    // Lấy dữ liệu từ form thêm
-    $idKhoa = $_POST["input1"];
-    $idMon = $_POST["input3"] = "";
-    $idLop = $_POST["input2"] = "";
-    $idGV = $_POST["input4"] = "";
-    $idPhong = $_POST["input5"];
-    $TGBD = $_POST["input6"];
-    $TGKT = $_POST["input7"];
-
-    // Kiểm tra xem giáo viên đã có lịch dạy trong khoảng thời gian này chưa
-    $checkSql = "SELECT * FROM xeplich 
-                 WHERE idGV = '$idGV' 
-                 AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                 OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT'))";
-
-    $result = $conn->query($checkSql);
-
-    if ($idKhoa == "" || $idMon == "" || $idLop == "" || $idGV == "" || $idPhong == "" || $TGBD == "" || $TGKT == "") {
-        $error = "Mời nhập đầy đủ thông tin";
-    } else {
-        // Kiểm tra số lượng hàng trả về
-        if ($result->num_rows > 0) {
-            // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-            $error = "Giáo viên này đã có lịch dạy trong khoảng thời gian này!";
-
-        } else {
-            // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã lớp đã chọn chưa
-            $checkSql = "SELECT * FROM xeplich 
-                 WHERE idLop = '$idLop' 
-                 AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                 OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT'))";
-
-            $result = $conn->query($checkSql);
-
-            // Kiểm tra số lượng hàng trả về
-            if ($result->num_rows > 0) {
-                // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-                $error = " Lớp này đã có lịch trong khoảng thời gian này!";
-
-            } else {
-                // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã phòng đã chọn chưa
-                $checkSql = "SELECT * FROM xeplich 
-                     WHERE idPhong = '$idPhong' 
-                     AND ((thoiGianBatDau >= '$TGBD' AND thoiGianBatDau < '$TGKT') 
-                     OR (TgianKetThuc > '$TGBD' AND TgianKetThuc <= '$TGKT'))";
-
-                $result = $conn->query($checkSql);
-
-                // Kiểm tra số lượng hàng trả về
-                if ($result->num_rows > 0) {
-                    // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-                    $error = "Phòng này đã có lịch trong khoảng thời gian này!";
-
-                } else {
-                    // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
-                    $insertPHSql = "INSERT INTO xeplich ( idMon, idLop, idGV, idPhong, idKhoa, thoiGianBatDau, TgianKetThuc) 
-                            VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$TGBD', '$TGKT')";
-
-
-                    // Thực hiện câu lệnh INSERT và kiểm tra kết quả
-                    if ($conn->query($insertPHSql) === TRUE) {
-                        // Thêm dữ liệu thành công
-                        $succes = "Thêm lịch học thành công";
-                    } else {
-                        // Xử lý khi thêm dữ liệu thất bại
-                        $error = "Thêm lịch học thất bại";
-                    }
-                }
-            }
-        }
-    }
-
-}
-
-
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
     $id = $_POST["ID"];
@@ -242,8 +160,8 @@ require_once 'header.php';
                                     <th>ID Giảng viên</th>
                                     <th>ID Phòng</th>
                                     <th>ID Khoa</th>
-                                    <th>Thời gian bắt đầu</th>
-                                    <th>Thời gian kết thúc</th>
+                                    <th>Ngày</th>
+                                    <th>Thời gian</th>
                                     <th>Tình trạng</th>
                                     <th>Chức năng</th>
                                 </tr>
@@ -272,10 +190,10 @@ require_once 'header.php';
                                                 <?php echo $searchResult["idKhoa"] ?>
                                             </td>
                                             <td>
-                                                <?php echo $searchResult["thoiGianBatDau"] ?>
+                                                <?php echo $searchResult["Date"] ?>
                                             </td>
                                             <td>
-                                                <?php echo $searchResult["TgianKetThuc"] ?>
+                                                <?php echo $searchResult["ThoiGian"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["tinhTrang"] ?>
@@ -314,10 +232,10 @@ require_once 'header.php';
                                                 <?php echo $row["idKhoa"] ?>
                                             </td>
                                             <td>
-                                                <?php echo $row["thoiGianBatDau"] ?>
+                                                <?php echo $row["Date"] ?>
                                             </td>
                                             <td>
-                                                <?php echo $row["TgianKetThuc"] ?>
+                                                <?php echo $row["ThoiGian"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $row["tinhTrang"] ?>
@@ -357,7 +275,6 @@ require_once 'header.php';
                                         <?php
                                         $getEmptyRoomsSql = "SELECT idKhoa FROM khoa";
                                         $emptyRoomsResult = $conn->query($getEmptyRoomsSql);
-
                                         if ($emptyRoomsResult && $emptyRoomsResult->num_rows > 0) {
                                             echo '<select id="input1" name="input1" class="rounded w-75" style="padding: 2px 3px;">';
                                             while ($row = $emptyRoomsResult->fetch_assoc()) {
@@ -402,15 +319,19 @@ require_once 'header.php';
                                         ?>
                                     </div>
                                     <div class="d-flex ms-2 mt-2">
-                                        <label for="">Bắt đầu: </label>
-                                        <input type="datetime-local" placeholder="Nhập số lượng"
-                                            style="padding: 2px 3px; margin-left: 8px" class="rounded w-75"
-                                            name="input6">
+                                        <label for="">Ngày: </label>
+                                        <input type="date" style="padding: 2px 3px; margin-left: 30px"
+                                            class="rounded w-75" name="input6">
                                     </div>
-                                    <div class="d-flex ms-2 mt-2">
-                                        <label for="">Kết thúc: </label>
-                                        <input type="datetime-local" placeholder="Nhập số lượng"
-                                            style="padding: 2px 3px" class="rounded w-75 ms-1" name="input7">
+                                    <div class="d-flex justify-content-between ms-2 mt-2">
+                                        <label for="">Thời gian: </label>
+                                        <select style="padding: 2px 3px; margin-left: 50px" class="rounded w-50"
+                                            name="input7">
+                                            <option value="Ca 1">Ca 1</option>
+                                            <option value="Ca 2">Ca 2</option>
+                                            <option value="Ca 3">Ca 3</option>
+                                            <option value="Ca 4">Ca 4</option>
+                                        </select>
                                     </div>
                                     <div class="ms-2 mt-2">
                                         <label for="" class="text-red">
@@ -421,9 +342,6 @@ require_once 'header.php';
                                         </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-2">
-                                        <div>
-                                            <input type="submit" name="add" value="Thêm" class="input-style">
-                                        </div>
                                         <div>
                                             <input type="submit" name="update" value="Sửa" class="input-style">
                                         </div>
