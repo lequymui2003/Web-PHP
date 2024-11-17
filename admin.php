@@ -59,6 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["search"])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
+    $tinhTrang = $_POST["input3"];
     // Biểu thức chính quy để kiểm tra ký tự đặc biệt
     // $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     // Kiểm tra xem Tên Phòng đã tồn tại chưa (loại trừ phòng đang sửa)
@@ -66,34 +67,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $result = $conn->query($checkDuplicateSql);
     if ($idPH == "" || $namePH == "") {
         $error = "Mời chọn phòng học cần sửa";
-    // } else {
-    //     // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
-    //     if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
-    //         $error = "Không nhập kí tự đặc biệt.";
-         } else {
-            if ($result->num_rows > 0) {
-                // Tên Phòng đã tồn tại (trừ phòng đang sửa), thông báo lỗi
-                $error = "Tên Phòng đã tồn tại.";
-            } else {
-                // Thực hiện cập nhật khi không có trùng lặp
-                $updatePHSql = "UPDATE phonghoc SET tenPhong = '$namePH' WHERE idPhong = '$idPH'";
+        // } else {
+        //     // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+        //     if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
+        //         $error = "Không nhập kí tự đặc biệt.";
+    } else {
+        if ($result->num_rows > 0) {
+            // Tên Phòng đã tồn tại (trừ phòng đang sửa), thông báo lỗi
+            $error = "Tên Phòng đã tồn tại.";
+        } else {
+            // Thực hiện cập nhật khi không có trùng lặp
+            $updatePHSql = "UPDATE phonghoc SET tenPhong = '$namePH', tinhTrang = '$tinhTrang' WHERE idPhong = '$idPH'";
 
-                if ($conn->query($updatePHSql) === TRUE) {
-                    // Cập nhật thành công
-                    $succes = "Cập nhật thành công.";
-                } else {
-                    // Lỗi khi cập nhật
-                    $error = "Lỗi: " . $conn->error;
-                }
+            if ($conn->query($updatePHSql) === TRUE) {
+                // Cập nhật thành công
+                $succes = "Cập nhật thành công.";
+            } else {
+                // Lỗi khi cập nhật
+                $error = "Lỗi: " . $conn->error;
             }
         }
     }
+}
 
 
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idPH = $_POST["input1"];
     $namePH = $_POST["input2"];
+    $tinhTrang = $_POST["input3"];
     //Biểu thức chính quy để kiểm tra ký tự đặc biệt
     // $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     //Kiểm tra xem ID hoặc Tên Phòng đã tồn tại chưa
@@ -103,27 +105,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     if ($idPH == "" || $namePH == "") {
         $error = "Mời nhập đầy đủ thông tin";
     } //else {
-        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
-        // if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
-        //     $error = "Không nhập kí tự đặc biệt.";
-         else {
-            if ($result->num_rows > 0) {
-                // ID hoặc Tên Phòng đã tồn tại, thông báo lỗi
-                $error = "ID hoặc Tên Phòng đã tồn tại.";
-            } else {
-                // Thực hiện thêm mới khi không có trùng lặp
-                $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong) VALUES ('$idPH', '$namePH')";
+    // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+    // if (preg_match($specialCharsPattern, $idPH) || preg_match($specialCharsPattern, $namePH)) {
+    //     $error = "Không nhập kí tự đặc biệt.";
+    else {
+        if ($result->num_rows > 0) {
+            // ID hoặc Tên Phòng đã tồn tại, thông báo lỗi
+            $error = "ID hoặc Tên Phòng đã tồn tại.";
+        } else {
+            // Thực hiện thêm mới khi không có trùng lặp
+            $insertPHSql = "INSERT INTO phonghoc (idPhong, tenPhong, tinhTrang) VALUES ('$idPH', '$namePH', '$tinhTrang')";
 
-                if ($conn->query($insertPHSql) === TRUE) {
-                    // Thêm mới thành công
-                    $succes = "Thêm mới thành công.";
-                } else {
-                    // Lỗi khi thêm mới
-                    $error = "Lỗi: " . $conn->error;
-                }
+            if ($conn->query($insertPHSql) === TRUE) {
+                // Thêm mới thành công
+                $succes = "Thêm mới thành công.";
+            } else {
+                // Lỗi khi thêm mới
+                $error = "Lỗi: " . $conn->error;
             }
         }
     }
+}
 
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
@@ -153,6 +155,7 @@ require_once 'header.php';
                                 <tr class="table-dark text-white">
                                     <th>ID Phòng</th>
                                     <th>Tên Phòng</th>
+                                    <th>Tình trạng</th>
                                     <th>Chức năng</th>
                                 </tr>
                             </thead>
@@ -169,6 +172,9 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["tenPhong"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["tinhTrang"] ?>
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
@@ -194,6 +200,9 @@ require_once 'header.php';
                                             </td>
                                             <td>
                                                 <?php echo $row["tenPhong"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["tinhTrang"] ?>
                                             </td>
                                             <td>
                                                 <form action="" method='post'>
@@ -234,17 +243,24 @@ require_once 'header.php';
                                         <input type="text" placeholder="Nhập tên phòng"
                                             style="padding: 2px 3px; text-align:left;" class="rounded" name="input2">
                                     </div>
+                                    <div class="d-flex flex-column ms-2 mt-2">
+                                        <label for="">Tình trạng: </label>
+                                        <select style="padding: 2px 3px; text-align:left;" class="rounded" name="input3">
+                                            <option value="Được sử dụng">Được sử dụng</option>
+                                            <option value="Đang bảo trì">Đang bảo trì</option>
+                                        </select>
+                                    </div>
                                     <div class="ms-2 mt-2">
                                         <label for="" class="">
                                             <label for="" class="text-red">
-                                            <?php 
-                                               echo $error
-                                            ?>
+                                                <?php
+                                                echo $error
+                                                    ?>
                                             </label>
                                             <label for="" class="text-green">
-                                            <?php 
-                                               echo $succes
-                                            ?>
+                                                <?php
+                                                echo $succes
+                                                    ?>
                                             </label>
                                         </label>
                                     </div>

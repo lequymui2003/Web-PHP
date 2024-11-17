@@ -171,8 +171,8 @@ require_once 'header.php';
                                 <tr class="table-dark text-white">
                                     <th>ID</th>
                                     <th>Tên</th>
-                                    <th>Số lượng tốt</th>
-                                    <th>Số lượng xấu</th>
+                                    <th>Hoạt động tốt</th>
+                                    <th>Hư hỏng</th>
                                     <th>ID Phòng</th>
                                     <th>Chức năng</th>
                                 </tr>
@@ -284,12 +284,12 @@ require_once 'header.php';
                                             value="<?php echo isset($selectedName) ? $selectedName : ''; ?>">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
-                                        <label for="">Số lượng tốt: </label>
+                                        <label for="">Số lượng hoạt động tốt: </label>
                                         <input type="text" placeholder="Nhập số lượng" style="padding: 2px 3px"
                                             class="rounded" name="input3">
                                     </div>
                                     <div class="d-flex flex-column ms-2 mt-2">
-                                        <label for="">Số lượng xấu: </label>
+                                        <label for="">Số lượng hư hỏng: </label>
                                         <input type="text" placeholder="Nhập số lượng" style="padding: 2px 3px"
                                             class="rounded" name="input4">
                                     </div>

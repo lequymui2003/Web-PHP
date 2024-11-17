@@ -38,7 +38,7 @@
                     <li><a href="QLMon.php" class="text-decoration-none ">Quản lý môn học</a></li>
                     <li><a href="QLGiangvien.php" class="text-decoration-none ">Quản lý giảng viên</a></li>
                     <li><a href="QLLop.php" class="text-decoration-none ">Quản lý lớp</a></li>
-                    <li><a href="QLcsvc.php" class="text-decoration-none ">Cơ sở vật chất</a></li>
+                    <li><a href="QLcsvc.php" class="text-decoration-none ">Vật tư</a></li>
                     <li><a href="QLtaikhoan.php" class="text-decoration-none ">Quản lý tài khoản</a></li>
                     <li><a href="xeplich.php" class="text-decoration-none ">Xếp lịch</a></li>
                     <li><a href="Baocaothongke.php" class="text-decoration-none ">Báo cáo thống kê</a></li>

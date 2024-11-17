@@ -40,7 +40,7 @@ if (isset($_GET['logout'])) {
 }
 //xử lý tìm kiếm bằng trống và phòng đã đăng ký
 $name = "";
-if(isset($_POST["search"])) {
+if (isset($_POST["search"])) {
     $name = $_POST["search-name"];
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
@@ -82,76 +82,79 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["dangky"])) {
     $time = $_POST["input7"];
     $date = $_POST["input6"];
 
-    // Kiểm tra xem giáo viên đã có lịch dạy trong khoảng thời gian này chưa
-    $checkSql = "SELECT * FROM xeplich 
-                 WHERE idGV = '$idGV' 
-                 AND (Date = '$date' AND ThoiGian = '$time')";
+    // Kiểm tra xem phòng học có đang bảo trì hay không
+    $checkPhongSql = "SELECT tinhTrang FROM phonghoc WHERE idPhong = '$idPhong'";
+    $phongResult = $conn->query($checkPhongSql);
 
-    $result = $conn->query($checkSql);
-
-    if ($idKhoa == "" || $idMon == "" || $idLop == "" || $idGV == "" || $idPhong == "" || $date == "" || $time == "") {
-        $error = "Mời nhập đầy đủ thông tin";
-    } else {
-        // Kiểm tra số lượng hàng trả về
-        if ($result->num_rows > 0) {
-            // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-            $error = "Giáo viên này đã có lịch dạy trong khoảng thời gian này!";
-
+    if ($phongResult->num_rows > 0) {
+        $phongData = $phongResult->fetch_assoc();
+        if ($phongData['tinhTrang'] === "Đang bảo trì") {
+            $error = "Phòng học này đang bảo trì, không thể đăng ký!";
         } else {
-            // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã lớp đã chọn chưa
-            $checkSql = "SELECT * FROM xeplich 
-                 WHERE idLop = '$idLop' 
-                 AND (Date = '$date' AND ThoiGian = '$time')";
-
-            $result = $conn->query($checkSql);
-
-            // Kiểm tra số lượng hàng trả về
-            if ($result->num_rows > 0) {
-                // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-                $error = " Lớp này đã có lịch trong khoảng thời gian này!";
-
+            // Tiếp tục kiểm tra các điều kiện khác
+            if ($idKhoa == "" || $idMon == "" || $idLop == "" || $idGV == "" || $idPhong == "" || $date == "" || $time == "") {
+                $error = "Mời nhập đầy đủ thông tin";
             } else {
-                // Kiểm tra xem đã có lịch học trong khoảng thời gian này cho mã phòng đã chọn chưa
+                // Kiểm tra xem giáo viên đã có lịch dạy trong khoảng thời gian này chưa
                 $checkSql = "SELECT * FROM xeplich 
-                     WHERE idPhong = '$idPhong' 
-                     AND (Date = '$date' AND ThoiGian = '$time')";
+                             WHERE idGV = '$idGV' 
+                             AND (Date = '$date' AND ThoiGian = '$time')";
 
                 $result = $conn->query($checkSql);
 
                 // Kiểm tra số lượng hàng trả về
                 if ($result->num_rows > 0) {
-                    // Nếu đã có lịch, hiển thị thông báo và ngăn chặn thêm dữ liệu
-                    $error = "Phòng này đã có lịch trong khoảng thời gian này!";
-
+                    $error = "Giáo viên này đã có lịch dạy trong khoảng thời gian này!";
                 } else {
-                    // Nếu không có lịch, thực hiện thêm dữ liệu vào cơ sở dữ liệu
-                    $insertPHSql = "INSERT INTO xeplich ( idMon, idLop, idGV, idPhong, idKhoa, Date, ThoiGian) 
-                            VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$date', '$time')";
+                    // Kiểm tra xem lớp đã có lịch trong khoảng thời gian này chưa
+                    $checkSql = "SELECT * FROM xeplich 
+                                 WHERE idLop = '$idLop' 
+                                 AND (Date = '$date' AND ThoiGian = '$time')";
 
+                    $result = $conn->query($checkSql);
 
-                    // Thực hiện câu lệnh INSERT và kiểm tra kết quả
-                    if ($conn->query($insertPHSql) === TRUE) {
-                        // Thêm dữ liệu thành công
-                        $succes = "Thêm lịch học thành công";
+                    if ($result->num_rows > 0) {
+                        $error = "Lớp này đã có lịch trong khoảng thời gian này!";
                     } else {
-                        // Xử lý khi thêm dữ liệu thất bại
-                        $error = "Thêm lịch học thất bại";
+                        // Kiểm tra xem phòng học đã có lịch chưa
+                        $checkSql = "SELECT * FROM xeplich 
+                                     WHERE idPhong = '$idPhong' 
+                                     AND (Date = '$date' AND ThoiGian = '$time')";
+
+                        $result = $conn->query($checkSql);
+
+                        if ($result->num_rows > 0) {
+                            $error = "Phòng này đã có lịch trong khoảng thời gian này!";
+                        } else {
+                            // Nếu không có lỗi, thêm lịch học vào cơ sở dữ liệu
+                            $insertPHSql = "INSERT INTO xeplich (idMon, idLop, idGV, idPhong, idKhoa, Date, ThoiGian) 
+                                            VALUES ('$idMon', '$idLop', '$idGV', '$idPhong', '$idKhoa', '$date', '$time')";
+
+                            if ($conn->query($insertPHSql) === TRUE) {
+                                $succes = "Thêm lịch học thành công";
+                            } else {
+                                $error = "Thêm lịch học thất bại";
+                            }
+                        }
                     }
                 }
             }
         }
+    } else {
+        $error = "Phòng học không tồn tại!";
     }
-
 }
 
+
 $sql = mysqli_query($conn, "SELECT xeplich.idPhong, phonghoc.tenPhong, 
-monhoc.tenMon, giangvien.tenGV, lop.tenLop,
-xeplich.Date, xeplich.ThoiGian, xeplich.tinhTrang
-FROM xeplich 
-join phonghoc on xeplich.idPhong = phonghoc.idPhong 
-join giangvien on xeplich.idGV = giangvien.idGiangVien
-join monhoc on xeplich.idMon = monhoc.idMon
-join lop on xeplich.idLop = lop.idLop");
+    monhoc.tenMon, giangvien.tenGV, lop.tenLop,
+    xeplich.Date, xeplich.ThoiGian, xeplich.tinhTrang
+    FROM xeplich 
+    JOIN phonghoc ON xeplich.idPhong = phonghoc.idPhong 
+    JOIN giangvien ON xeplich.idGV = giangvien.idGiangVien
+    JOIN monhoc ON xeplich.idMon = monhoc.idMon
+    JOIN lop ON xeplich.idLop = lop.idLop
+    WHERE xeplich.Date >= CURDATE()");
 if (mysqli_num_rows($sql) === 0) {
 }
 ?>

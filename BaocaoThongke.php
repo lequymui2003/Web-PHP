@@ -28,10 +28,7 @@ if (isset($_GET['logout'])) {
 $error = "";
 $name = "";
 if (isset($_POST['search'])) {
-    $searchPHSql = "SELECT phonghoc.idPhong, phonghoc.tenPhong,
-        xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang  FROM 
-        phonghoc join xeplich on phonghoc.idPhong = xeplich.idPhong 
-        WHERE xeplich.tinhTrang = 'Trống'";
+    $searchPHSql = "SELECT * FROM phonghoc WHERE tinhTrang = 'Được sử dụng'";
     $result = $conn->query($searchPHSql);
     if ($result) {
         if (mysqli_num_rows($result) > 0) {
@@ -43,10 +40,7 @@ if (isset($_POST['search'])) {
         }
     }
 } elseif (isset($_POST['search2'])) {
-    $searchPHSql = "SELECT phonghoc.idPhong, phonghoc.tenPhong,
-        xeplich.thoiGianBatDau, xeplich.TgianKetThuc, xeplich.tinhTrang  FROM 
-        phonghoc join xeplich on phonghoc.idPhong = xeplich.idPhong 
-        WHERE xeplich.tinhTrang = 'Đã đăng ký'";
+    $searchPHSql = "SELECT * FROM phonghoc WHERE tinhTrang = 'Đang bảo trì'";
     $result = $conn->query($searchPHSql);
     if ($result) {
         if (mysqli_num_rows($result) > 0) {
@@ -65,10 +59,11 @@ if (isset($_POST['search'])) {
     $specialCharsPattern = "/[!@#\$%\^\&*()]/";
     if (!empty($name)) {
         // Xử lý tìm kiếm theo tên phòng
-        $searchPHSql = "SELECT cosovatchat.ten, ctcosovatchat.SoLuongTot,
-        ctcosovatchat.SoLuongXau FROM ctcosovatchat 
-        join cosovatchat on ctcosovatchat.id =  cosovatchat.id
-        WHERE idPhong = '$name'";
+        $searchPHSql = "SELECT cosovatchat.ten, ctcosovatchat.SoLuongTot, ctcosovatchat.SoLuongXau, ctcosovatchat.idPhong, phonghoc.tenPhong
+                        FROM  ctcosovatchat
+                        join cosovatchat on cosovatchat.id = ctcosovatchat.id
+                        join phonghoc on ctcosovatchat.idPhong = phonghoc.idPhong
+                        WHERE phonghoc.idPhong = '$name'";
         $result = $conn->query($searchPHSql);
         if (preg_match($specialCharsPattern, $name)) {
             $error = "Không nhập kí tự đặc biệt.";
@@ -87,9 +82,7 @@ if (isset($_POST['search'])) {
     }
 }
 
-$sql = mysqli_query($conn, "SELECT phonghoc.idPhong, phonghoc.tenPhong,
-xeplich.Date, xeplich.ThoiGian, xeplich.tinhTrang
-FROM phonghoc join xeplich on phonghoc.idPhong = xeplich.idPhong");
+$sql = mysqli_query($conn, "SELECT * FROM phonghoc");
 if (mysqli_num_rows($sql) === 0) {
 }
 
@@ -119,8 +112,6 @@ require_once 'header.php';
                                         <tr class="table-dark text-white">
                                             <th>ID Phòng</th>
                                             <th>Tên Phòng</th>
-                                            <th>Ngày</th>
-                                            <th>Thời gian</th>
                                             <th>Tình trạng</th>
                                         </tr>
                                     </thead>
@@ -137,12 +128,6 @@ require_once 'header.php';
                                                     </td>
                                                     <td>
                                                         <?php echo $searchResult["tenPhong"] ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php echo $searchResult["Date"] ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php echo $searchResult["ThoiGian"] ?>
                                                     </td>
                                                     <td>
                                                         <?php echo $searchResult["tinhTrang"] ?>
@@ -166,12 +151,6 @@ require_once 'header.php';
                                                         <?php echo $row["tenPhong"] ?>
                                                     </td>
                                                     <td>
-                                                        <?php echo $row["Date"] ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php echo $row["ThoiGian"] ?>
-                                                    </td>
-                                                    <td>
                                                         <?php echo $row["tinhTrang"] ?>
                                                     </td>
                                                 </tr>
@@ -187,13 +166,13 @@ require_once 'header.php';
                                 <div class="row d-flex justify-content-center">
                                     <div class="col-xs-4 col-sm-12 col-md-12 col-lg-6">
                                         <form method="post" action="" class="d-flex justify-content-around form-search">
-                                            <input type="submit" name="search" value="Phòng trống"
+                                            <input type="submit" name="search" value="Phòng sử dụng"
                                                 class="input-style me-4">
                                         </form>
                                     </div>
                                     <div class="col-xs-4 col-sm-12 col-md-12 col-lg-6">
                                         <form method="post" action="" class="d-flex justify-content-around form-search">
-                                            <input type="submit" name="search2" value="Phòng đã đăng ký"
+                                            <input type="submit" name="search2" value="Phòng bảo trì"
                                                 class="input-style me-5">
                                         </form>
                                     </div>

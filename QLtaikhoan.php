@@ -115,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $password = md5($_POST["input2"]);
     $name = $_POST["input3"];
     $email = $_POST["input4"];
-    $phanquyen = $_POST["input5"];
+    // $phanquyen = $_POST["input5"];
     // Biểu thức chính quy để kiểm tra ký tự đặc biệt
     $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem Username hoặc Email đã tồn tại chưa
@@ -130,8 +130,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
         // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
         if (
             preg_match($specialCharsPattern, $username) || preg_match($specialCharsPattern, $password)
-            || preg_match($specialCharsPattern, $name)  || preg_match($specialCharsPattern, $phanquyen)
-        ) {
+            || preg_match($specialCharsPattern, $name))
+        {
             $error = "Không nhập kí tự đặc biệt.";
         } else {
             if ($result->num_rows > 0) {
@@ -142,8 +142,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
                 $error = "Email không đúng định dạng.";
             } else {
                 // Thực hiện thêm mới khi không có trùng lặp và Email hợp lệ
-                $insertPHSql = "INSERT INTO users (username, password, Name, email, role) 
-                        VALUES ('$username', '$password', '$name', '$email', '$phanquyen')";
+                $insertPHSql = "INSERT INTO users (username, password, Name, email) 
+                        VALUES ('$username', '$password', '$name', '$email')";
 
                 if ($conn->query($insertPHSql) === TRUE) {
                     // Thêm mới thành công
@@ -289,13 +289,13 @@ require_once 'header.php';
                                         <input type="text" placeholder="Nhập Email" style="padding: 2px 3px"
                                             class="rounded" name="input4">
                                     </div>
-                                    <div class="d-flex flex-column ms-2 mt-2">
+                                    <!-- <div class="d-flex flex-column ms-2 mt-2">
                                         <label for="">Phân quyền: </label>
                                         <select name="input5" style="padding: 2px 3px" class="rounded">
                                             <option value="admin">admin</option>
                                             <option value="user">user</option>
                                         </select>
-                                    </div>
+                                    </div> -->
                                     <div class="ms-2 mt-2">
                                         <label for="" class="text-red">
                                             <?php
