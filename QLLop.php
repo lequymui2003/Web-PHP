@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     // Biểu thức chính quy để kiểm tra ký tự đặc biệt
     $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
     // Kiểm tra xem ID Lớp đã tồn tại chưa (loại trừ lớp đang sửa)
-    $checkDuplicateSql = "SELECT * FROM lop WHERE idLop = '$idLop'";
+    $checkDuplicateSql = "SELECT * FROM lop WHERE idLop = '$idLop' AND idLop != '$idLop'";
     $result = $conn->query($checkDuplicateSql);
         // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
         if (
@@ -276,11 +276,17 @@ require_once 'header.php';
                                         ?>
                                     </div>
                                     <div class="ms-2 mt-2">
-                                        <label for="" class="text-red">
-                                            <?php
-                                            echo $error;
-                                            echo $succes;
-                                            ?>
+                                        <label for="" class="">
+                                            <label for="" class="text-red">
+                                                <?php
+                                                echo $error
+                                                    ?>
+                                            </label>
+                                            <label for="" class="text-green">
+                                                <?php
+                                                echo $succes
+                                                    ?>
+                                            </label>
                                         </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">

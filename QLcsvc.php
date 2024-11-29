@@ -311,11 +311,17 @@ require_once 'header.php';
                                         ?>
                                     </div>
                                     <div class="ms-2 mt-2">
-                                        <label for="" class="text-red">
-                                            <?php
-                                            echo $error;
-                                            echo $succes;
-                                            ?>
+                                        <label for="" class="">
+                                            <label for="" class="text-red">
+                                                <?php
+                                                echo $error
+                                                    ?>
+                                            </label>
+                                            <label for="" class="text-green">
+                                                <?php
+                                                echo $succes
+                                                    ?>
+                                            </label>
                                         </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">

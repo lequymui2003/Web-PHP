@@ -379,7 +379,6 @@ if (mysqli_num_rows($sql) === 0) {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-
                         <form id="changePasswordForm" method="post" action="">
                             <div class="mb-3">
                                 <label for="oldPassword" class="form-label">Mật khẩu cũ:</label>
@@ -500,11 +499,17 @@ if (mysqli_num_rows($sql) === 0) {
                                 </div>
                             </div>
                             <div class="ms-2 mt-2">
-                                <label for="" class="text-red">
-                                    <?php
-                                    echo $error;
-                                    echo $succes;
-                                    ?>
+                                <label for="" class="">
+                                    <label for="" class="text-red">
+                                        <?php
+                                        echo $error
+                                            ?>
+                                    </label>
+                                    <label for="" class="text-green">
+                                        <?php
+                                        echo $succes
+                                            ?>
+                                    </label>
                                 </label>
                             </div>
                             <div class="modal-footer">

@@ -3,7 +3,7 @@ include "./database/Class-Database.php";
 global $conn;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["oldPassword"]) && isset($_POST["newPassword"]) && isset($_POST["confirmPassword"])) {
-    $oldPassword = $_POST["oldPassword"];
+    $oldPassword = md5($_POST["oldPassword"]); // Mã hóa mật khẩu cũ bằng MD5
     $newPassword = $_POST["newPassword"];
     $confirmPassword = $_POST["confirmPassword"];
 
@@ -19,11 +19,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["oldPassword"]) && isse
         $currentPassword = $row['password'];
 
         // Kiểm tra mật khẩu cũ có khớp với mật khẩu hiện tại không
-        if ($oldPassword == $currentPassword) {
+        if ($oldPassword === $currentPassword) { // So sánh mật khẩu cũ đã mã hóa với mật khẩu trong cơ sở dữ liệu
             // Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp nhau không
             if ($newPassword === $confirmPassword) {
+                // Mã hóa mật khẩu mới bằng MD5 trước khi cập nhật
+                $newPasswordMd5 = md5($newPassword);
+
                 // Cập nhật mật khẩu mới cho người dùng
-                $updateSql = "UPDATE users SET password = '$newPassword' WHERE username = '$username'";
+                $updateSql = "UPDATE users SET password = '$newPasswordMd5' WHERE username = '$username'";
                 if (mysqli_query($conn, $updateSql)) {
                     echo "success"; // Trả về thông báo thành công
                     exit();
@@ -47,4 +50,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["oldPassword"]) && isse
     echo "Yêu cầu không hợp lệ";
     exit();
 }
+
 ?>

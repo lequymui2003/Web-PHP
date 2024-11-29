@@ -65,7 +65,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $idKhoa = $_POST["input4"];
     // Biểu thức chính quy để kiểm tra ký tự đặc biệt
     $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
-        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+    // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+    if ($idMon == "" || $tenMon == "" || $soTinChi == "" || $idKhoa == "") {
+        $error = "Mời bạn chọn môn học cần sửa";
+    } else {
         if (
             preg_match($specialCharsPattern, $idMon) || preg_match($specialCharsPattern, $tenMon)
             || preg_match($specialCharsPattern, $soTinChi) || preg_match($specialCharsPattern, $idKhoa)
@@ -73,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
             $error = "Không nhập kí tự đặc biệt.";
         } else {
             // Kiểm tra số tín chỉ nhỏ hơn 5
-            if ($soTinChi <= 5) {
+            if ($soTinChi <= 15) {
                 // Câu lệnh UPDATE
                 $updateMonHocSql = "UPDATE monhoc 
                         SET tenMon = '$tenMon', soTinChi = '$soTinChi', idKhoa = '$idKhoa'
@@ -94,6 +97,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
         }
     }
 
+}
+
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $idMon = $_POST["input1"];
@@ -105,7 +110,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     // Kiểm tra xem ID hoặc Tên Môn đã tồn tại chưa
     $checkDuplicateSql = "SELECT * FROM monhoc WHERE idMon = '$idMon' OR tenMon = '$tenMon'";
     $result = $conn->query($checkDuplicateSql);
-        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+    // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
+    if ($idMon == "" || $tenMon == "" || $soTinChi == "" || $idKhoa == "") {
+        $error = "Mời nhập đầy đủ thông tin";
+    } else {
         if (
             preg_match($specialCharsPattern, $idMon) || preg_match($specialCharsPattern, $tenMon)
             || preg_match($specialCharsPattern, $soTinChi) || preg_match($specialCharsPattern, $idKhoa)
@@ -135,6 +143,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
             }
         }
     }
+
+}
 
 // Xử lý xóa 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["delete"])) {
@@ -281,11 +291,17 @@ require_once 'header.php';
                                         ?>
                                     </div>
                                     <div class="ms-2 mt-2">
-                                        <label for="" class="text-red">
-                                            <?php
-                                            echo $error;
-                                            echo $succes;
-                                            ?>
+                                        <label for="" class="">
+                                            <label for="" class="text-red">
+                                                <?php
+                                                echo $error
+                                                    ?>
+                                            </label>
+                                            <label for="" class="text-green">
+                                                <?php
+                                                echo $succes
+                                                    ?>
+                                            </label>
                                         </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">

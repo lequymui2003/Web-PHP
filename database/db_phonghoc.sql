@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 06, 2024 lúc 03:21 AM
+-- Thời gian đã tạo: Th10 25, 2024 lúc 04:24 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -181,23 +181,25 @@ INSERT INTO `monhoc` (`idMon`, `tenMon`, `soTinChi`, `idKhoa`) VALUES
 
 CREATE TABLE `phonghoc` (
   `idPhong` char(5) NOT NULL,
-  `tenPhong` varchar(50) NOT NULL
+  `tenPhong` varchar(50) NOT NULL,
+  `tinhTrang` varchar(100) NOT NULL DEFAULT 'Được sử dụng'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `phonghoc`
 --
 
-INSERT INTO `phonghoc` (`idPhong`, `tenPhong`) VALUES
-('P001', 'Phòng 1'),
-('P002', 'Phòng 2'),
-('P003', 'Phòng 3'),
-('P004', 'Phòng 4'),
-('P005', 'Phòng 5'),
-('P006', 'Phòng 6'),
-('P007', 'Phòng 7'),
-('P008', 'Phòng 8'),
-('P009', 'Phòng 9');
+INSERT INTO `phonghoc` (`idPhong`, `tenPhong`, `tinhTrang`) VALUES
+('P001', 'Phòng 1', 'Được sử dụng'),
+('P002', 'Phòng 2', 'Được sử dụng'),
+('P003', 'Phòng 3', 'Đang bảo trì'),
+('P004', 'Phòng 4', 'Đang bảo trì'),
+('P005', 'Phòng 5', 'Được sử dụng'),
+('P006', 'Phòng 6', 'Đang bảo trì'),
+('P007', 'Phòng 7', 'Được sử dụng'),
+('P008', 'Phòng 8', 'Đang bảo trì'),
+('P009', 'Phòng 9', 'Được sử dụng'),
+('P010', 'Phòng 10', 'Đang bảo trì');
 
 -- --------------------------------------------------------
 
@@ -264,7 +266,9 @@ CREATE TABLE `xeplich` (
 
 INSERT INTO `xeplich` (`id`, `idMon`, `idLop`, `idGV`, `idPhong`, `idKhoa`, `Date`, `ThoiGian`, `tinhTrang`) VALUES
 (148, 'M008', 'L007', 'GV03', 'P005', 'K03', '2024-10-29', 'Ca 2', 'Đã đăng ký'),
-(149, 'M001', 'L007', 'GV03', 'P001', 'K03', '2024-10-29', 'Ca 4', 'Đã đăng ký');
+(149, 'M001', 'L007', 'GV03', 'P001', 'K03', '2024-10-29', 'Ca 4', 'Đã đăng ký'),
+(150, 'M001', 'L002', 'GV03', 'P005', 'K02', '2024-11-11', 'Ca 2', 'Đã đăng ký'),
+(151, 'M004', 'L002', 'GV01', 'P003', 'K02', '2024-11-18', 'Ca 1', 'Đã đăng ký');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -354,7 +358,7 @@ ALTER TABLE `ctcosovatchat`
 -- AUTO_INCREMENT cho bảng `xeplich`
 --
 ALTER TABLE `xeplich`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=150;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

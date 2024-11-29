@@ -64,9 +64,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
     $password = md5($_POST["input2"]);
     $name = $_POST["input3"];
     $email = $_POST["input4"];
-    $phanquyen = $_POST["input5"];
+    
     // Biểu thức chính quy để kiểm tra ký tự đặc biệt
     $specialCharsPattern = "/[!@#\$%\^\&*()-]/";
+
     // Kiểm tra xem Username đã tồn tại chưa (loại trừ user đang sửa)
     $checkDuplicateSql = "SELECT * FROM users WHERE username = '$username' AND username != '$username'";
     $result = $conn->query($checkDuplicateSql);
@@ -77,37 +78,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update"])) {
 
     // Kiểm tra định dạng Email
     $isValidEmail = preg_match('/^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,}@gmail\.com$/', $email);
-        // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
-        if (
-            preg_match($specialCharsPattern, $username) || preg_match($specialCharsPattern, $password)
-            || preg_match($specialCharsPattern, $name)  || preg_match($specialCharsPattern, $phanquyen)
-        ) {
-            $error = "Không nhập kí tự đặc biệt.";
-        } else {
-            if ($result->num_rows > 0) {
-                // Username đã tồn tại (loại trừ user đang sửa), thông báo lỗi
-                $error = "Username đã tồn tại.";
-            } elseif ($resultEmail->num_rows > 0) {
-                // Email đã tồn tại (loại trừ user đang sửa), thông báo lỗi
-                $error = "Email đã tồn tại.";
-            } elseif (!$isValidEmail) {
-                // Email không hợp lệ, thông báo lỗi
-                $error = "Email không đúng định dạng.";
-            } else {
-                // Thực hiện cập nhật khi không có trùng lặp và Email hợp lệ
-                $updatePHSql = "UPDATE users SET email = '$email', Name = '$name', role = '$phanquyen'
-                        WHERE username = '$username'";
 
-                if ($conn->query($updatePHSql) === TRUE) {
-                    // Cập nhật thành công
-                    $succes = "Cập nhật thành công.";
-                } else {
-                    // Lỗi khi cập nhật
-                    $error = "Lỗi: " . $conn->error;
-                }
-            }
+    // Kiểm tra điều kiện rỗng
+    if (empty($username) || empty($password) || empty($name) || empty($email)) {
+        $error = "Mời nhập đầy đủ thông tin.";
+    } elseif (preg_match($specialCharsPattern, $username) || preg_match($specialCharsPattern, $name)) {
+        // Kiểm tra ký tự đặc biệt
+        $error = "Không nhập kí tự đặc biệt.";
+    } elseif ($result->num_rows > 0) {
+        // Username đã tồn tại (loại trừ user đang sửa)
+        $error = "Username đã tồn tại.";
+    } elseif ($resultEmail->num_rows > 0) {
+        // Email đã tồn tại (loại trừ user đang sửa)
+        $error = "Email đã tồn tại.";
+    } elseif (!$isValidEmail) {
+        // Email không hợp lệ
+        $error = "Email không đúng định dạng.";
+    } else {
+        // Thực hiện cập nhật khi tất cả kiểm tra đều hợp lệ
+        $updatePHSql = "UPDATE users SET email = '$email', Name = '$name'
+                        WHERE username = '$username'";
+        if ($conn->query($updatePHSql) === TRUE) {
+            $succes = "Cập nhật thành công.";
+        } else {
+            $error = "Lỗi: " . $conn->error;
         }
     }
+}
+
 
 // Xử lý thêm 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
@@ -123,15 +121,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add"])) {
     $result = $conn->query($checkDuplicateSql);
     // Kiểm tra định dạng Email
     $isValidEmail = preg_match('/^[a-zA-Z0-9](\.?[a-zA-Z0-9]){5,}@gmail\.com$/', $email);
-//    if (empty($username) || empty($_POST["input2"]) || empty($name) || empty($email)) {
+    //    if (empty($username) || empty($_POST["input2"]) || empty($name) || empty($email)) {
     if (empty($name) || empty($email)) {
         $error = "Mời nhập đầy đủ thông tin";
-    }else {
+    } else {
         // Kiểm tra xem có ký tự đặc biệt trong id hoặc name không
         if (
             preg_match($specialCharsPattern, $username) || preg_match($specialCharsPattern, $password)
-            || preg_match($specialCharsPattern, $name))
-        {
+            || preg_match($specialCharsPattern, $name)
+        ) {
             $error = "Không nhập kí tự đặc biệt.";
         } else {
             if ($result->num_rows > 0) {
@@ -184,6 +182,7 @@ require_once 'header.php';
                             <thead>
                                 <tr class="table-dark text-white">
                                     <th>Username</th>
+                                    <th>Password</th>
                                     <th>Họ và tên</th>
                                     <th>Email</th>
                                     <th>Phân quyền</th>
@@ -200,6 +199,9 @@ require_once 'header.php';
                                         <tr class="<?php echo $class ?>">
                                             <td>
                                                 <?php echo $searchResult["username"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $searchResult["password"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $searchResult["Name"] ?>
@@ -231,6 +233,9 @@ require_once 'header.php';
                                         <tr class="<?php echo $class ?>">
                                             <td>
                                                 <?php echo $row["username"] ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $row["password"] ?>
                                             </td>
                                             <td>
                                                 <?php echo $row["Name"] ?>
@@ -297,11 +302,17 @@ require_once 'header.php';
                                         </select>
                                     </div> -->
                                     <div class="ms-2 mt-2">
-                                        <label for="" class="text-red">
-                                            <?php
-                                            echo $error;
-                                            echo $succes;
-                                            ?>
+                                        <label for="" class="">
+                                            <label for="" class="text-red">
+                                                <?php
+                                                echo $error
+                                                    ?>
+                                            </label>
+                                            <label for="" class="text-green">
+                                                <?php
+                                                echo $succes
+                                                    ?>
+                                            </label>
                                         </label>
                                     </div>
                                     <div class="d-flex  justify-content-between  ms-2 mt-4">
